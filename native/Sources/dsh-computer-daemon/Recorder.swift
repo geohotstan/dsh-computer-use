@@ -153,14 +153,18 @@ final class Recorder {
      * expression type-check budget on the CI toolchain.
      */
     private static func runTapLoop() {
-        let mask: CGEventMask = CGEventMask(1 << CGEventType.keyDown.rawValue)
-            | CGEventMask(1 << CGEventType.keyUp.rawValue)
-            | CGEventMask(1 << CGEventType.leftMouseDown.rawValue)
-            | CGEventMask(1 << CGEventType.leftMouseUp.rawValue)
-            | CGEventMask(1 << CGEventType.rightMouseDown.rawValue)
-            | CGEventMask(1 << CGEventType.rightMouseUp.rawValue)
-            | CGEventMask(1 << CGEventType.scrollWheel.rawValue)
-            | CGEventMask(1 << CGEventType.mouseMoved.rawValue)
+        // One bit per line: the single OR-chain expression exceeds Swift 5.10's
+        // expression type-check budget on the CI toolchain ("unable to
+        // type-check this expression in reasonable time").
+        var mask: CGEventMask = 0
+        mask |= CGEventMask(1 << CGEventType.keyDown.rawValue)
+        mask |= CGEventMask(1 << CGEventType.keyUp.rawValue)
+        mask |= CGEventMask(1 << CGEventType.leftMouseDown.rawValue)
+        mask |= CGEventMask(1 << CGEventType.leftMouseUp.rawValue)
+        mask |= CGEventMask(1 << CGEventType.rightMouseDown.rawValue)
+        mask |= CGEventMask(1 << CGEventType.rightMouseUp.rawValue)
+        mask |= CGEventMask(1 << CGEventType.scrollWheel.rawValue)
+        mask |= CGEventMask(1 << CGEventType.mouseMoved.rawValue)
         let callback = recorderTapCallback
         guard let created = CGEvent.tapCreate(
             tap: .cgSessionEventTap,

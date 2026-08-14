@@ -116,8 +116,8 @@ pnpm run build     # esbuild → lib/, tsc → lib/types
 
 ## 验证
 
-- CI `check` 任务（Ubuntu）：从 npm 全新 `pnpm install`——正是用户走的路径——然后 typecheck、test、build。测试驱动一个 fake daemon，因此不需要桌面、macOS 权限或原生构建。
-- CI `native` 任务（macOS）：构建并单测 Swift 助手守护进程。
+- CI `check` 任务（Ubuntu）：从 npm 全新 `pnpm install`——正是用户走的路径——然后对已发布的 `@deepseek-ai/*` 包做 typecheck 与 build。
+- CI `native` 任务（macOS）：构建并单测 Swift 助手守护进程，并运行 Node 测试套件——引擎按设计只支持 macOS（在非 darwin 主机上构造时抛出平台闸门），因此启动引擎的测试放在这里，驱动 fake daemon、不触碰真实桌面。
 - CI `install` 任务（Ubuntu）：对真实 CLI 跑文档里的安装链路——`dsh plugin --profile ci add` 分别从检出路径与打包 tarball 安装——然后组合 profile，断言 bundle 层已注册、三行已组合、且每个 `dsh-computer-use/*` 行都能通过已安装的包解析并加载。
 
 ## 许可证

@@ -116,8 +116,8 @@ pnpm run build     # esbuild → lib/, tsc → lib/types
 
 ## Verification
 
-- CI `check` job (Ubuntu): a clean `pnpm install` from npm — the user-facing path — then typecheck, test, and build. Tests drive a fake daemon, so no desktop, macOS permissions, or native build are required.
-- CI `native` job (macOS): builds and unit-tests the Swift helper daemon.
+- CI `check` job (Ubuntu): a clean `pnpm install` from npm — the user-facing path — then typecheck and build against the published `@deepseek-ai/*` packages.
+- CI `native` job (macOS): builds and unit-tests the Swift helper daemon, and runs the Node test suite — the engine is macOS-only by design (it throws a platform gate on non-darwin hosts), so the tests that boot it live here and drive a fake daemon, touching no live desktop.
 - CI `install` job (Ubuntu): runs the documented chains against the real CLI — `dsh plugin --profile ci add` from both the checkout path and a packed tarball — then composes the profile and asserts the bundle layer registered, the three rows composed, and every `dsh-computer-use/*` row resolves and loads through the installed package.
 
 ## License

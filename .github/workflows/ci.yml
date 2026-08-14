@@ -6,10 +6,11 @@ on:
   pull_request:
 
 jobs:
-  # The package builds and tests against PUBLISHED harness packages, with no
+  # Static validation on Linux against PUBLISHED harness packages, with no
   # harness checkout: this is the path a user takes with `dsh plugin add`.
-  # Tests drive a fake daemon (tests/computer-local/fixtures), so no desktop,
-  # macOS permissions, or native build are required.
+  # Typecheck covers src and tests; the runtime tests cannot run here — the
+  # computer-local engine boots only on macOS (it throws a platform gate on
+  # construction), so they run in the native job below.
   check:
     runs-on: ubuntu-latest
     steps:
@@ -31,25 +32,40 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
-      - name: Test
-        run: pnpm run test
-
       - name: Build
         run: pnpm run build
 
-  # Native side: the resident macOS helper daemon (Swift). macOS-only by design.
-  # Proves the daemon compiles and its unit tests pass; bundling/signing into
-  # the .app is a release step (`pnpm run build:native`) done on a signed host.
+  # The macOS side: the resident Swift helper daemon plus the Node test suite.
+  # The engine is macOS-only by design (it throws on non-darwin hosts), so the
+  # tests that boot it — the executor, settings, and integration stacks over
+  # the fake daemon — only make sense here. Bundling/signing into the .app is
+  # a release step (`pnpm run build:native`) done on a signed host.
   native:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # No `version:` here — the action reads packageManager from
+      # package.json; specifying both is an error ("Multiple versions").
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Build the daemon
         run: swift build -c release --package-path native
 
       - name: Test the daemon
         run: swift test --package-path native
+
+      - name: Test (Node)
+        run: pnpm test
 
   # The documented install paths, run for real: `dsh plugin --profile <name>
   # add` against the actual CLI, once from the checkout path (linked, the
