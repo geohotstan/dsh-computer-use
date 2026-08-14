@@ -1,29 +1,61 @@
 {
   "name": "dsh-computer-use",
+  "description": "Desktop computer use for DeepSeek Harness (DSH): macOS app listing, accessibility-tree window capture, screenshots, and synthesized input — the seam, the local Swift-daemon provider, the computer_use_* tools, the approval policy, and a standalone MCP server in one installable plugin package",
   "version": "0.1.0",
-  "private": true,
-  "description": "Standalone DeepSeek Harness plugin: desktop computer use on macOS — app listing, accessibility-tree window capture, screenshots, and synthesized mouse/keyboard input, cloned from Codex Computer Use",
+  "license": "MIT",
   "type": "module",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "bin": {
+    "dsh-computer-mcp": "lib/mcp.js"
+  },
   "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
     "./computer": {
-      "types": "./packages/computer/lib/types/index.d.ts",
-      "default": "./packages/computer/lib/index.js"
+      "types": "./lib/types/computer/index.d.ts",
+      "default": "./lib/computer/index.js"
+    },
+    "./computer/invariant": {
+      "types": "./lib/types/computer/invariant.d.ts",
+      "default": "./lib/computer/invariant.js"
     },
     "./computer-local": {
-      "types": "./packages/computer-local/lib/types/index.d.ts",
-      "default": "./packages/computer-local/lib/index.js"
+      "types": "./lib/types/computer-local/index.d.ts",
+      "default": "./lib/computer-local/index.js"
+    },
+    "./computer-local/invariant": {
+      "types": "./lib/types/computer-local/invariant.d.ts",
+      "default": "./lib/computer-local/invariant.js"
     },
     "./computer-tools": {
-      "types": "./packages/computer-tools/lib/types/index.d.ts",
-      "default": "./packages/computer-tools/lib/index.js"
+      "types": "./lib/types/computer-tools/index.d.ts",
+      "default": "./lib/computer-tools/index.js"
+    },
+    "./computer-tools/invariant": {
+      "types": "./lib/types/computer-tools/invariant.d.ts",
+      "default": "./lib/computer-tools/invariant.js"
     },
     "./computer-policy": {
-      "types": "./packages/computer-policy/lib/types/index.d.ts",
-      "default": "./packages/computer-policy/lib/index.js"
+      "types": "./lib/types/computer-policy/index.d.ts",
+      "default": "./lib/computer-policy/index.js"
+    },
+    "./computer-policy/invariant": {
+      "types": "./lib/types/computer-policy/invariant.d.ts",
+      "default": "./lib/computer-policy/invariant.js"
     },
     "./computer-mcp": {
-      "types": "./packages/computer-mcp/lib/types/index.d.ts",
-      "default": "./packages/computer-mcp/lib/index.js"
+      "types": "./lib/types/computer-mcp/index.d.ts",
+      "default": "./lib/computer-mcp/index.js"
+    },
+    "./computer-mcp/invariant": {
+      "types": "./lib/types/computer-mcp/invariant.d.ts",
+      "default": "./lib/computer-mcp/invariant.js"
     },
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./package.json": "./package.json"
@@ -34,26 +66,56 @@
     }
   },
   "files": [
+    "lib",
+    "native",
     "cordis.patch.yml",
     "README.md",
     "README.zh.md",
     "LICENSE",
-    "packages/*/lib/**/*.js",
-    "packages/*/lib/**/*.d.ts",
-    "packages/computer-local/native"
+    "skills"
   ],
   "scripts": {
+    "build": "node build.mjs",
+    "prepare": "node build.mjs",
+    "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "typecheck": "tsc -b packages/computer packages/computer-local packages/computer-tools packages/computer-policy packages/computer-mcp --pretty false && tsc -p tsconfig.tests.json",
-    "build": "tsc -b packages/computer packages/computer-local packages/computer-tools packages/computer-policy packages/computer-mcp --pretty false && tsdown --config tsdown.config.ts",
-    "build:native": "swift build -c release --package-path packages/computer-local/native && bash packages/computer-local/native/scripts/bundle.sh"
+    "check": "pnpm run typecheck && pnpm run test && pnpm run build",
+    "build:native": "swift build -c release --package-path native && bash native/scripts/bundle.sh"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-attachment": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-llm": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-skill": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-subprocess": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-subprocess-local": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-timeout": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.5 <0.1.0"
   },
   "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-attachment": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-attachment-local": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-llm": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-skill": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-subprocess": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-subprocess-local": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-timeout": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/schemastery": "^3.18.1",
     "@types/node": "^22.20.0",
+    "esbuild": "^0.25.0",
     "typescript": "^6.0.3",
-    "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.8",
-    "tsdown": "^0.22.2"
+    "vitest": "^4.1.8"
   },
   "packageManager": "pnpm@11.21.0+sha512.521705bce689924eac72f5a3587122f362689ef6571e55ba80076fd637c11132ecffada26fad4ea79c485bfddbfd3d5a2a5b05805a77e893de71ec8a6cca3bb1"
 }

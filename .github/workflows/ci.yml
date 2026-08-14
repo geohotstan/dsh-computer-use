@@ -6,10 +6,10 @@ on:
   pull_request:
 
 jobs:
-  # TypeScript side: depends only on published @deepseek-ai/* packages, so a
-  # clean `pnpm install` from npm is the user-facing path (`dsh plugin add`).
-  # Tests drive a fake daemon (packages/computer-local/tests/fixtures), so no
-  # desktop, macOS permissions, or native build are required.
+  # The package builds and tests against PUBLISHED harness packages, with no
+  # harness checkout: this is the path a user takes with `dsh plugin add`.
+  # Tests drive a fake daemon (tests/computer-local/fixtures), so no desktop,
+  # macOS permissions, or native build are required.
   check:
     runs-on: ubuntu-latest
     steps:
@@ -46,17 +46,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build the daemon
-        run: swift build -c release --package-path packages/computer-local/native
+        run: swift build -c release --package-path native
 
       - name: Test the daemon
-        run: swift test --package-path packages/computer-local/native
+        run: swift test --package-path native
 
-  # The documented install path, run for real: `dsh plugin --profile <name> add
-  # <checkout>` against the actual CLI. The repo root is the DSH bundle — its
-  # patch rows name `dsh-computer-use/*` subpaths, so this job first builds the
-  # host libs the exports map points at, then proves the bundle registers as a
-  # profile layer, its rows compose, and every row resolves through the linked
-  # checkout. Nothing boots the daemon, so Ubuntu suffices.
+  # The documented install paths, run for real: `dsh plugin --profile <name>
+  # add` against the actual CLI, once from the checkout path (linked, the
+  # README's manual form) and once from a packed tarball (the registry form).
+  # The package is a DSH bundle whose patch rows name `dsh-computer-use/*`
+  # subpaths, so each chain proves the bundle registers as a profile layer, its
+  # rows compose, and every row resolves and loads through the installed
+  # package. Nothing boots the daemon, so Ubuntu suffices.
   install:
     runs-on: ubuntu-latest
     steps:
@@ -75,13 +76,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build host libs
+      - name: Build lib
         run: pnpm run build
 
       - name: Install the dsh CLI
         run: npm install -g @deepseek-ai/dsh@0.1.0-rc.6
 
-      - name: Add the bundle to a scratch profile
+      - name: Add the bundle from the checkout path
         run: |
           export DSH_HOME="$RUNNER_TEMP/dsh-home"
           dsh plugin --profile ci add "$GITHUB_WORKSPACE"
@@ -90,37 +91,57 @@ jobs:
             if (!d.dsh.profile.bundles.includes('dsh-computer-use')) {
               throw new Error('the bundle layer was not registered')
             }
-            console.log('bundle layer registered:', d.dsh.profile.bundles.join(', '))
+            console.log('checkout install — bundle layer registered:', d.dsh.profile.bundles.join(', '))
           "
 
-      - name: Compose the profile
+      - name: Add the bundle from a packed tarball
+        run: |
+          export DSH_HOME="$RUNNER_TEMP/dsh-home"
+          pnpm pack --pack-destination "$RUNNER_TEMP"
+          dsh plugin --profile citar add "$RUNNER_TEMP"/dsh-computer-use-*.tgz
+          node -e "
+            const d = require('$DSH_HOME/profiles/citar/package.json')
+            if (!d.dsh.profile.bundles.includes('dsh-computer-use')) {
+              throw new Error('the bundle layer was not registered')
+            }
+            console.log('tarball install — bundle layer registered:', d.dsh.profile.bundles.join(', '))
+          "
+
+      - name: Compose both profiles
         run: |
           export DSH_HOME="$RUNNER_TEMP/dsh-home"
           dsh --profile ci --dump-config > "$RUNNER_TEMP/dump.txt"
-          grep -q 'computer-engine' "$RUNNER_TEMP/dump.txt"
-          grep -q 'dsh-computer-use/computer-local' "$RUNNER_TEMP/dump.txt"
-          grep -q 'computer-tools' "$RUNNER_TEMP/dump.txt"
-          grep -q 'dsh-computer-use/computer-policy' "$RUNNER_TEMP/dump.txt"
+          dsh --profile citar --dump-config > "$RUNNER_TEMP/dump-citar.txt"
+          for dump in "$RUNNER_TEMP/dump.txt" "$RUNNER_TEMP/dump-citar.txt"; do
+            grep -q 'computer-engine' "$dump"
+            grep -q 'dsh-computer-use/computer-local' "$dump"
+            grep -q 'computer-tools' "$dump"
+            grep -q 'dsh-computer-use/computer-policy' "$dump"
+          done
           echo "composed rows referencing this bundle: $(grep -c 'dsh-computer-use/' "$RUNNER_TEMP/dump.txt")"
 
-      # Every patch row resolves through the linked checkout's exports map to a
-      # built lib file — exactly what a profile boot does — and each entry
-      # module imports cleanly (its bare dsh/cordis imports resolve through the
-      # checkout's workspace install). Plugin export shapes vary: three packages
-      # use a default export, computer-tools uses named `apply`.
-      - name: Verify every patch row resolves and loads through the installed bundle
+      # Every patch row resolves through the installed package's exports map to
+      # a built lib file — exactly what a profile boot does — and each entry
+      # module imports cleanly (its bare @deepseek-ai/* imports resolve through
+      # the profile). Plugin export shapes vary: three entries use a default
+      # export, computer-tools uses named `apply`.
+      - name: Verify every patch row resolves and loads from both installs
         run: |
           export DSH_HOME="$RUNNER_TEMP/dsh-home"
-          node --input-type=module -e "
-            import { createRequire } from 'node:module'
-            import { existsSync } from 'node:fs'
-            const req = createRequire(process.env.DSH_HOME + '/profiles/ci/package.json')
-            for (const sub of ['computer', 'computer-local', 'computer-tools', 'computer-policy']) {
-              const entry = req.resolve('dsh-computer-use/' + sub)
-              if (!existsSync(entry)) throw new Error('resolved entry is missing: ' + entry)
-              const mod = await import(entry)
-              const plugin = mod.default ?? mod.apply
-              if (typeof plugin !== 'function') throw new Error(sub + ': neither a default export nor apply()')
-              console.log(sub, '->', entry, '(loads)')
-            }
-          "
+          for profile in ci citar; do
+            echo "--- profile: $profile"
+            node --input-type=module -e "
+              import { createRequire } from 'node:module'
+              import { existsSync } from 'node:fs'
+              const profile = process.argv[1]
+              const req = createRequire(process.env.DSH_HOME + '/profiles/' + profile + '/package.json')
+              for (const sub of ['computer', 'computer-local', 'computer-tools', 'computer-policy']) {
+                const entry = req.resolve('dsh-computer-use/' + sub)
+                if (!existsSync(entry)) throw new Error('resolved entry is missing: ' + entry)
+                const mod = await import(entry)
+                const plugin = mod.default ?? mod.apply
+                if (typeof plugin !== 'function') throw new Error(sub + ': neither a default export nor apply()')
+                console.log(sub, '->', entry, '(loads)')
+              }
+            " "$profile"
+          done

@@ -6,11 +6,21 @@ A standalone plugin for the [DeepSeek Harness](https://github.com/deepseek-ai/de
 
 The design is accessibility-tree-first: `computer_use_get_app_state` returns a numbered, tab-indented element tree; the model acts on element indexes, with window-relative coordinates as a fallback, and later captures of the same app return diffs instead of the full tree.
 
-The complete feature delta against OpenAI's implementation lives in [docs/codex-parity.md](docs/codex-parity.md); that reference is the parity checklist.
+Everything ships in this one package: the seam, the local Swift-daemon provider, the `computer_use_*` tools, the approval policy, and a standalone MCP server. The complete feature delta against OpenAI's implementation lives in [docs/codex-parity.md](docs/codex-parity.md); that reference is the parity checklist.
 
 ## Install
 
-This repository is a DSH bundle: the root `package.json` declares `dsh.bundle.patch` → [`cordis.patch.yml`](cordis.patch.yml), which inserts the three host rows. Install it from a checkout, like any other bundle.
+This repository is a DSH bundle: the root `package.json` declares `dsh.bundle.patch` → [`cordis.patch.yml`](cordis.patch.yml), which inserts the three host rows under this package's own subpaths (`dsh-computer-use/*`). One install brings everything.
+
+```sh
+# from npm
+dsh plugin --profile <name> add dsh-computer-use
+
+# or from this checkout (linked install; build lib/ and the daemon first, below)
+dsh plugin --profile <name> add <checkout>
+```
+
+The registry tarball ships `lib/`, so installing does not run a build (`prepare` only runs for git installs).
 
 ### Lazy path
 
@@ -20,61 +30,63 @@ Tell your dsh:
 Install this plugin package: https://github.com/geohotstan/dsh-computer-use
 ```
 
-### Manual
+### Manual (from a checkout)
 
 ```sh
 git clone https://github.com/geohotstan/dsh-computer-use
 cd dsh-computer-use
 pnpm install
-pnpm run build            # host lib/ for the plugin packages
+pnpm run build            # host lib/ for the plugin entries
 pnpm run build:native     # build + sign + bundle the daemon (once per machine; Xcode CLT required)
 cd <where you run dsh>
 dsh plugin --profile <name> add ../dsh-computer-use
 ```
 
-`dsh plugin add` registers the repo as a bundle layer in the profile (`dsh.profile.bundles`). Its rows name `dsh-computer-use/*` subpaths, so everything resolves through the linked checkout — no sibling-package dependencies to install. Then point `helperPath` (or `DSH_COMPUTER_HELPER_PATH`) at the daemon executable inside the signed bundle and restart the web service:
+`dsh plugin add` registers the repo as a bundle layer in the profile (`dsh.profile.bundles`). Then point `helperPath` (or `DSH_COMPUTER_HELPER_PATH`) at the daemon executable inside the signed bundle and restart the web service:
 
 ```sh
-# helper: <checkout>/packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
+# helper: <checkout>/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
 ```
 
 Keep the checkout at a fixed path — macOS keys the TCC grants on the helper's bundle id, code signature, and on-disk path (see [Permissions](#permissions)).
 
-## Packages
+## Entries
 
-| Package | Role | Loader row |
+One package, five subpath entries (plus the invariant companions under `./<entry>/invariant`):
+
+| Entry | Role | Loader row |
 |---|---|---|
-| [`dsh-computer`](packages/computer/README.md) | Service Definition — `ctx.computer` | `computer-local` registers it |
-| [`dsh-computer-local`](packages/computer-local/README.md) | Local provider — resident Swift daemon (AX tree, screenshots, CGEvent input) | `dsh-computer-use/computer-local` |
-| [`dsh-computer-tools`](packages/computer-tools/README.md) | The `computer_use_*` tools plus the `computer-use` skill | `dsh-computer-use/computer-tools` |
-| [`dsh-computer-policy`](packages/computer-policy/README.md) | Per-app approval gate + Codex-style tier guidance + `computer_use_list_granted_applications` | `dsh-computer-use/computer-policy` |
-| [`dsh-computer-mcp`](packages/computer-mcp/README.md) | Standalone MCP stdio server exposing the same surface for external MCP clients | not a loader row — a binary |
+| [`./computer`](docs/computer.md) | Service Definition — `ctx.computer` | registered by `computer-local` |
+| [`./computer-local`](docs/computer-local.md) | Local provider — resident Swift daemon (AX tree, screenshots, CGEvent input) | `dsh-computer-use/computer-local` |
+| [`./computer-tools`](docs/computer-tools.md) | The `computer_use_*` tools plus the `computer-use` skill | `dsh-computer-use/computer-tools` |
+| [`./computer-policy`](docs/computer-policy.md) | Per-app approval gate + Codex-style tier guidance + `computer_use_list_granted_applications` | `dsh-computer-use/computer-policy` |
+| [`./computer-mcp`](docs/computer-mcp.md) | Standalone MCP stdio server exposing the same surface for external MCP clients | not a loader row — a binary |
 
 ## Compose
 
-Authoring a composition by hand (inside the harness source tree, where the packages are workspace or published dependencies) uses the bare package names:
+Authoring a composition by hand uses the same subpaths:
 
 ```yaml
 plugins:
   computer-engine:
-    plugin: dsh-computer-local
+    plugin: dsh-computer-use/computer-local
     config:
       helperPath: /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
   computer-tools:
-    plugin: dsh-computer-tools
+    plugin: dsh-computer-use/computer-tools
   computer-policy:
-    plugin: dsh-computer-policy
+    plugin: dsh-computer-use/computer-policy
 ```
 
 `helperPath` must point at the bundled daemon executable; the other rows are optional (`dsh-computer-policy` needs an approval service mounted, e.g. `@deepseek-ai/dsh-user-approval`). A runnable composition lives in [`example/cordis.yml`](example/cordis.yml).
 
 ## MCP server
 
-`dsh-computer-mcp` exposes the same surface — the official ten Codex Computer Use window tools plus `request_access` and the three `event_stream_*` recording tools — as a standalone MCP stdio server over the same engine, so Codex CLI, Claude Code, or any MCP client can drive the harness's computer use:
+The `dsh-computer-mcp` bin exposes the same surface — the official ten Codex Computer Use window tools plus `request_access` and the three `event_stream_*` recording tools — as a standalone MCP stdio server over the same engine, so Codex CLI, Claude Code, or any MCP client can drive the harness's computer use. The bin keeps the harness packages external like every other entry (`@deepseek-ai/dsh-subprocess-local` ships node-pty, a native module that cannot be bundled), so it runs wherever `pnpm install` has materialized the dependencies:
 
 ```sh
 # from this checkout, after `pnpm run build`
-node packages/computer-mcp/lib/mcp.js /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
+node lib/mcp.js /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
 # or with the environment override
 DSH_COMPUTER_HELPER_PATH=/absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon dsh-computer-mcp
 ```
@@ -99,14 +111,14 @@ The default ad-hoc signature works, but its designated requirement is the binary
 pnpm install
 pnpm test          # fake-daemon tests; nothing touches a live desktop
 pnpm run typecheck
-pnpm run build     # emits lib/ for all four packages
+pnpm run build     # esbuild → lib/, tsc → lib/types
 ```
 
 ## Verification
 
 - CI `check` job (Ubuntu): a clean `pnpm install` from npm — the user-facing path — then typecheck, test, and build. Tests drive a fake daemon, so no desktop, macOS permissions, or native build are required.
 - CI `native` job (macOS): builds and unit-tests the Swift helper daemon.
-- CI `install` job (Ubuntu): runs the documented chain against the real CLI — `dsh plugin --profile ci add <checkout>` — then composes the profile and asserts the bundle layer registered, the three rows composed, and every `dsh-computer-use/*` row resolves to built `lib/` through the linked checkout.
+- CI `install` job (Ubuntu): runs the documented chains against the real CLI — `dsh plugin --profile ci add` from both the checkout path and a packed tarball — then composes the profile and asserts the bundle layer registered, the three rows composed, and every `dsh-computer-use/*` row resolves and loads through the installed package.
 
 ## License
 

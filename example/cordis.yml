@@ -1,16 +1,14 @@
-# Minimal composition showing the three plugin rows in the authoring form
-# (bare package names — valid when the packages are workspace/published
-# dependencies). The installable form is the root `cordis.patch.yml` bundle
-# layer, whose rows name `dsh-computer-use/*` subpaths; `dsh plugin add`
-# applies it. Fill `helperPath` with the executable inside the bundled, signed
-# daemon app (built by `pnpm run build:native` at
-# packages/computer-local/native/.build/).
+# Minimal composition showing the three plugin rows. `dsh plugin add` applies
+# the equivalent via the bundle layer in the root `cordis.patch.yml`, whose
+# rows name the same `dsh-computer-use/*` subpaths. Fill `helperPath` with the
+# executable inside the bundled, signed daemon app (built by
+# `pnpm run build:native` at native/.build/).
 plugins:
   computer-engine:
-    plugin: dsh-computer-local
+    plugin: dsh-computer-use/computer-local
     config:
       helperPath: /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
   computer-tools:
-    plugin: dsh-computer-tools
+    plugin: dsh-computer-use/computer-tools
   computer-policy:
-    plugin: dsh-computer-policy
+    plugin: dsh-computer-use/computer-policy

@@ -6,13 +6,13 @@
 #
 # The rows name THIS package's subpaths (`dsh-computer-use/*`, resolved through
 # the profile's node_modules via the exports map in the root package.json), so
-# installing the repo itself (`dsh plugin --profile <name> add <checkout>`)
-# brings everything along — no sibling-package deps to resolve.
+# a single install — `dsh plugin --profile <name> add dsh-computer-use` from
+# npm, or `... add <checkout>` from this repo — brings everything along.
 #
 # helperPath: the executable inside the bundled, signed daemon app. When
 # omitted, the engine falls back to the DSH_COMPUTER_HELPER_PATH environment
 # variable. Set it per-machine (build with `pnpm run build:native` first):
-#   <checkout>/packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
+#   <checkout>/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
 
 - insert:
     - id: computer-engine

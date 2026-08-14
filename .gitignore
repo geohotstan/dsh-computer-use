@@ -1,9 +1,7 @@
 node_modules/
 lib/
 *.tsbuildinfo
-packages/*/lib/
-packages/*/node_modules/
-packages/computer-local/native/.build/
+native/.build/
 coverage/
 
 # Packed tarballs.

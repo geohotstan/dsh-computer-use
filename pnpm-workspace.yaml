@@ -1,27 +1,15 @@
+# Single-package layout: the repo root is its own workspace member so pnpm 11
+# reads settings from here (the package.json `pnpm` field is ignored).
 packages:
-  - 'packages/*'
+  - '.'
+nodeLinker: hoisted
 allowBuilds:
-  '@deepseek-ai/dsh-subprocess-local': true
+  esbuild: true
   node-pty: true
-minimumReleaseAgeExclude:
-  - '@deepseek-ai/cordis@4.0.1'
-  - '@deepseek-ai/cosmokit@1.8.2'
-  - '@deepseek-ai/dsh-agent@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-attachment-local@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-attachment@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-brand@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-code-runtime@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-home-paths@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-invariants@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-llm@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-scope@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-session@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-settings@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-subprocess-local@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-subprocess@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-system-prompt@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-timeout@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-tools@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-typert-protocol@0.1.0-rc.6'
-  - '@deepseek-ai/dsh-user-approval@0.1.0-rc.6'
-  - '@deepseek-ai/schemastery@3.18.1'
+  '@deepseek-ai/dsh-subprocess-local': true
+
+# Every harness dependency is a first-party @deepseek-ai package pinned to one
+# release train (0.1.0-rc.x). The cooldown exists to slow adoption of freshly
+# published third-party versions; here it only blocks the pinned set, so it is
+# disabled rather than tracked as an ever-growing allowlist.
+minimumReleaseAge: 0
