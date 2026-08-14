@@ -1,0 +1,37 @@
+{
+  "name": "dsh-computer",
+  "description": "Desktop computer-use engine seam (ctx.computer): app listing, key-window state capture with accessibility tree, and synthesized mouse/keyboard input",
+  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./invariant": {
+      "types": "./lib/types/invariant.d.ts",
+      "default": "./lib/invariant.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.0-rc.5 <0.1.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.0-rc.5 <0.1.0"
+  }
+}

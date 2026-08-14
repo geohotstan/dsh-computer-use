@@ -1,0 +1,13 @@
+node_modules/
+lib/
+*.tsbuildinfo
+packages/*/lib/
+packages/*/node_modules/
+packages/computer-local/native/.build/
+coverage/
+
+# Packed tarballs.
+*.tgz
+
+# OS noise.
+.DS_Store

@@ -1,0 +1,12 @@
+# Minimal composition showing the three plugin rows. Fill `helperPath` with
+# the executable inside the bundled, signed daemon app (built by
+# `pnpm run build:native` at packages/computer-local/native/.build/).
+plugins:
+  computer-engine:
+    plugin: dsh-computer-local
+    config:
+      helperPath: /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
+  computer-tools:
+    plugin: dsh-computer-tools
+  computer-policy:
+    plugin: dsh-computer-policy

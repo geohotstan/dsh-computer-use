@@ -1,0 +1,37 @@
+{
+  // Doubles as the resolution facade for vite-tsconfig-paths (the vitest
+  // config points here). NEVER add include/files to this file: it would leak
+  // into every extending package project and narrow the facade's match-all
+  // scope.
+  "compilerOptions": {
+    "target": "es2024",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "declaration": true,
+    "composite": true,
+    "incremental": true,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "verbatimModuleSyntax": false,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "types": ["node"],
+    // Source-level resolution for the plugin's internal packages; external
+    // harness dependencies resolve from node_modules.
+    "paths": {
+      "dsh-computer": ["./packages/computer/src"],
+      "dsh-computer-local": ["./packages/computer-local/src"],
+      "dsh-computer-tools": ["./packages/computer-tools/src"],
+      "dsh-computer-policy": ["./packages/computer-policy/src"],
+      "dsh-computer-mcp": ["./packages/computer-mcp/src"]
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "name": "dsh-computer-mcp",
+  "description": "Standalone MCP stdio server exposing the Codex Computer Use tool surface backed by the dsh computer-use engine",
+  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "bin": {
+    "dsh-computer-mcp": "lib/mcp.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-subprocess-local": ">=0.1.0-rc.5 <0.1.0",
+    "dsh-computer": "workspace:^",
+    "dsh-computer-local": "workspace:^"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-subprocess-local": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "dsh-computer": "workspace:^",
+    "dsh-computer-local": "workspace:^"
+  }
+}

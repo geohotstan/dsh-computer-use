@@ -1,0 +1,50 @@
+{
+  "name": "dsh-computer-policy",
+  "description": "Approval policy for the computer-use tools: per-app control grants, always-confirm destructive actions, and Codex-style tier guidance",
+  "version": "0.1.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./invariant": {
+      "types": "./lib/types/invariant.d.ts",
+      "default": "./lib/invariant.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.5 <0.1.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-invariants": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-llm": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-settings": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-subprocess-local": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-system-prompt": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/dsh-tools": ">=0.1.0-rc.5 <0.1.0",
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "dsh-computer": "workspace:^",
+    "dsh-computer-local": "workspace:^",
+    "dsh-computer-tools": "workspace:^"
+  }
+}

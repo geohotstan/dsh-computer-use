@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # TypeScript side: depends only on published @deepseek-ai/* packages, so a
+  # clean `pnpm install` from npm is the user-facing path (`dsh plugin add`).
+  # Tests drive a fake daemon (packages/computer-local/tests/fixtures), so no
+  # desktop, macOS permissions, or native build are required.
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+  # Native side: the resident macOS helper daemon (Swift). macOS-only by design.
+  # Proves the daemon compiles and its unit tests pass; bundling/signing into
+  # the .app is a release step (`pnpm run build:native`) done on a signed host.
+  native:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the daemon
+        run: swift build -c release --package-path packages/computer-local/native
+
+      - name: Test the daemon
+        run: swift test --package-path packages/computer-local/native

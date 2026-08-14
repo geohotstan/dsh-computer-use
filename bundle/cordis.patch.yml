@@ -1,0 +1,26 @@
+# dsh-computer-use bundle patch: the desktop computer-use capability, inserted
+# over the profile root. All three rows are host-plane — the engine is a
+# singleton desktop controller (publishes ctx.computer), and the tools/policy
+# register into the host registries, so every preset in the profile (standard,
+# creator/cordis, code) sees the computer_use_* tools.
+#
+# helperPath: the executable inside the bundled, signed daemon app. When
+# omitted, the engine falls back to the DSH_COMPUTER_HELPER_PATH environment
+# variable. Set it per-machine (build with `pnpm run build:native` first):
+#   <plugin-root>/packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
+
+- insert:
+    - id: computer-engine
+      name: dsh-computer-local
+      config:
+        timeoutMs: 30000
+
+    - id: computer-tools
+      name: dsh-computer-tools
+      config:
+        enableScreenshots: true
+
+    - id: computer-policy
+      name: dsh-computer-policy
+      config:
+        allowlistApps: []

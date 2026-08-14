@@ -1,0 +1,21 @@
+{
+  "name": "dsh-computer-use",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone DeepSeek Harness plugin: desktop computer use on macOS — app listing, accessibility-tree window capture, screenshots, and synthesized mouse/keyboard input, cloned from Codex Computer Use",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -b packages/computer packages/computer-local packages/computer-tools packages/computer-policy packages/computer-mcp --pretty false && tsc -p tsconfig.tests.json",
+    "build": "tsc -b packages/computer packages/computer-local packages/computer-tools packages/computer-policy packages/computer-mcp --pretty false && tsdown --config tsdown.config.ts",
+    "build:native": "swift build -c release --package-path packages/computer-local/native && bash packages/computer-local/native/scripts/bundle.sh"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.0",
+    "typescript": "^6.0.3",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.8",
+    "tsdown": "^0.22.2"
+  },
+  "packageManager": "pnpm@11.21.0+sha512.521705bce689924eac72f5a3587122f362689ef6571e55ba80076fd637c11132ecffada26fad4ea79c485bfddbfd3d5a2a5b05805a77e893de71ec8a6cca3bb1"
+}
