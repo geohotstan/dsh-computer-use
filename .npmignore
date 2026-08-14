@@ -1,0 +1,4 @@
+# npm publish ignores .gitignore for subtrees named by the files field;
+# belt-and-braces exclusion of the Swift build artifacts (the files field
+# already limits `native` to Package.swift, Sources, and scripts).
+native/.build/
