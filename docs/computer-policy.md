@@ -1,4 +1,4 @@
-# @geohotstan/dsh-codex-computer-use/computer-policy
+# @zibokapi/dsh-codex-computer-use/computer-policy
 
 English | [中文](README.zh.md)
 

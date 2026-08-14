@@ -38,7 +38,21 @@ jobs:
       - name: Build
         run: pnpm run build
 
+      - name: Check whether this version is already published
+        id: published
+        run: |
+          NAME=$(node -p "require('./package.json').name")
+          VERSION=$(node -p "require('./package.json').version")
+          if npm view "$NAME@$VERSION" version >/dev/null 2>&1; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Skips when the tag points at an already-published version (e.g. a tag
+      # pushed after a manual publish), so the job is idempotent.
       - name: Publish to npm
+        if: steps.published.outputs.already == 'false'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish

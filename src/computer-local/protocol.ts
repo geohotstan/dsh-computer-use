@@ -9,7 +9,7 @@
  *
  * Every value decoded here is a wire input: field-by-field validation is the
  * boundary this module owns, mirroring the seam's typed shapes.
- * @module @geohotstan/dsh-codex-computer-use/computer-local/protocol
+ * @module @zibokapi/dsh-codex-computer-use/computer-local/protocol
  */
 
 /** The methods the daemon implements, in the seam's request order. */

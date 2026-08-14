@@ -7,7 +7,7 @@
  * tree, so providers keep a resident capture session (the Codex Computer Use
  * two-process layout: a resident service behind a short-lived frontend).
  * Execution policy and model-facing rendering belong to consumers.
- * @module @geohotstan/dsh-codex-computer-use/computer
+ * @module @zibokapi/dsh-codex-computer-use/computer
  */
 
 import { Context, Service } from '@deepseek-ai/cordis'

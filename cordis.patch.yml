@@ -1,12 +1,12 @@
-# @geohotstan/dsh-codex-computer-use bundle patch: the desktop computer-use capability, inserted
+# @zibokapi/dsh-codex-computer-use bundle patch: the desktop computer-use capability, inserted
 # over the profile root. All three rows are host-plane — the engine is a
 # singleton desktop controller (publishes ctx.computer), and the tools/policy
 # register into the host registries, so every preset in the profile (standard,
 # creator/cordis, code) sees the computer_use_* tools.
 #
-# The rows name THIS package's subpaths (`@geohotstan/dsh-codex-computer-use/*`, resolved through
+# The rows name THIS package's subpaths (`@zibokapi/dsh-codex-computer-use/*`, resolved through
 # the profile's node_modules via the exports map in the root package.json), so
-# a single install — `dsh plugin --profile <name> add @geohotstan/dsh-codex-computer-use` from
+# a single install — `dsh plugin --profile <name> add @zibokapi/dsh-codex-computer-use` from
 # npm, or `... add <checkout>` from this repo — brings everything along.
 #
 # helperPath: the executable inside the bundled, signed daemon app. When
@@ -16,16 +16,16 @@
 
 - insert:
     - id: computer-engine
-      name: '@geohotstan/dsh-codex-computer-use/computer-local'
+      name: '@zibokapi/dsh-codex-computer-use/computer-local'
       config:
         timeoutMs: 30000
 
     - id: computer-tools
-      name: '@geohotstan/dsh-codex-computer-use/computer-tools'
+      name: '@zibokapi/dsh-codex-computer-use/computer-tools'
       config:
         enableScreenshots: true
 
     - id: computer-policy
-      name: '@geohotstan/dsh-codex-computer-use/computer-policy'
+      name: '@zibokapi/dsh-codex-computer-use/computer-policy'
       config:
         allowlistApps: []

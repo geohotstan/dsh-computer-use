@@ -7,7 +7,7 @@
  * OpenAI's Codex Computer Use window API: element indexes address controls
  * from the latest captured tree, and window-relative coordinates are the
  * fallback for elements the tree cannot address.
- * @module @geohotstan/dsh-codex-computer-use/computer/types
+ * @module @zibokapi/dsh-codex-computer-use/computer/types
  */
 
 /** Mouse buttons accepted by click input. Long and single-letter spellings both denote one button. */

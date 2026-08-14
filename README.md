@@ -1,4 +1,4 @@
-# @geohotstan/dsh-codex-computer-use
+# @zibokapi/dsh-codex-computer-use
 
 English | [中文](README.zh.md)
 
@@ -10,11 +10,11 @@ Everything ships in this one package: the seam, the local Swift-daemon provider,
 
 ## Install
 
-This repository is a DSH bundle: the root `package.json` declares `dsh.bundle.patch` → [`cordis.patch.yml`](cordis.patch.yml), which inserts the three host rows under this package's own subpaths (`@geohotstan/dsh-codex-computer-use/*`). One install brings everything.
+This repository is a DSH bundle: the root `package.json` declares `dsh.bundle.patch` → [`cordis.patch.yml`](cordis.patch.yml), which inserts the three host rows under this package's own subpaths (`@zibokapi/dsh-codex-computer-use/*`). One install brings everything.
 
 ```sh
 # from npm
-dsh plugin --profile <name> add @geohotstan/dsh-codex-computer-use
+dsh plugin --profile <name> add @zibokapi/dsh-codex-computer-use
 
 # or from this checkout (linked install; build lib/ and the daemon first, below)
 dsh plugin --profile <name> add <checkout>
@@ -27,19 +27,19 @@ The registry tarball ships `lib/`, so installing does not run a build (`prepare`
 Tell your dsh:
 
 ```
-Install this plugin package: https://github.com/geohotstan/@geohotstan/dsh-codex-computer-use
+Install this plugin package: https://github.com/geohotstan/dsh-computer-use
 ```
 
 ### Manual (from a checkout)
 
 ```sh
-git clone https://github.com/geohotstan/@geohotstan/dsh-codex-computer-use
-cd @geohotstan/dsh-codex-computer-use
+git clone https://github.com/geohotstan/dsh-computer-use
+cd @zibokapi/dsh-codex-computer-use
 pnpm install
 pnpm run build            # host lib/ for the plugin entries
 pnpm run build:native     # build + sign + bundle the daemon (once per machine; Xcode CLT required)
 cd <where you run dsh>
-dsh plugin --profile <name> add ../@geohotstan/dsh-codex-computer-use
+dsh plugin --profile <name> add ../@zibokapi/dsh-codex-computer-use
 ```
 
 `dsh plugin add` registers the repo as a bundle layer in the profile (`dsh.profile.bundles`). Then point `helperPath` (or `DSH_COMPUTER_HELPER_PATH`) at the daemon executable inside the signed bundle and restart the web service:
@@ -57,9 +57,9 @@ One package, five subpath entries (plus the invariant companions under `./<entry
 | Entry | Role | Loader row |
 |---|---|---|
 | [`./computer`](docs/computer.md) | Service Definition — `ctx.computer` | registered by `computer-local` |
-| [`./computer-local`](docs/computer-local.md) | Local provider — resident Swift daemon (AX tree, screenshots, CGEvent input) | `@geohotstan/dsh-codex-computer-use/computer-local` |
-| [`./computer-tools`](docs/computer-tools.md) | The `computer_use_*` tools plus the `computer-use` skill | `@geohotstan/dsh-codex-computer-use/computer-tools` |
-| [`./computer-policy`](docs/computer-policy.md) | Per-app approval gate + Codex-style tier guidance + `computer_use_list_granted_applications` | `@geohotstan/dsh-codex-computer-use/computer-policy` |
+| [`./computer-local`](docs/computer-local.md) | Local provider — resident Swift daemon (AX tree, screenshots, CGEvent input) | `@zibokapi/dsh-codex-computer-use/computer-local` |
+| [`./computer-tools`](docs/computer-tools.md) | The `computer_use_*` tools plus the `computer-use` skill | `@zibokapi/dsh-codex-computer-use/computer-tools` |
+| [`./computer-policy`](docs/computer-policy.md) | Per-app approval gate + Codex-style tier guidance + `computer_use_list_granted_applications` | `@zibokapi/dsh-codex-computer-use/computer-policy` |
 | [`./computer-mcp`](docs/computer-mcp.md) | Standalone MCP stdio server exposing the same surface for external MCP clients | not a loader row — a binary |
 
 ## Compose
@@ -69,26 +69,26 @@ Authoring a composition by hand uses the same subpaths:
 ```yaml
 plugins:
   computer-engine:
-    plugin: '@geohotstan/dsh-codex-computer-use/computer-local'
+    plugin: '@zibokapi/dsh-codex-computer-use/computer-local'
     config:
       helperPath: /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
   computer-tools:
-    plugin: '@geohotstan/dsh-codex-computer-use/computer-tools'
+    plugin: '@zibokapi/dsh-codex-computer-use/computer-tools'
   computer-policy:
-    plugin: '@geohotstan/dsh-codex-computer-use/computer-policy'
+    plugin: '@zibokapi/dsh-codex-computer-use/computer-policy'
 ```
 
-`helperPath` must point at the bundled daemon executable; the other rows are optional (`@geohotstan/dsh-codex-computer-use/computer-policy` needs an approval service mounted, e.g. `@deepseek-ai/dsh-user-approval`). A runnable composition lives in [`example/cordis.yml`](example/cordis.yml).
+`helperPath` must point at the bundled daemon executable; the other rows are optional (`@zibokapi/dsh-codex-computer-use/computer-policy` needs an approval service mounted, e.g. `@deepseek-ai/dsh-user-approval`). A runnable composition lives in [`example/cordis.yml`](example/cordis.yml).
 
 ## MCP server
 
-The `@geohotstan/dsh-codex-computer-use/computer-mcp` bin exposes the same surface — the official ten Codex Computer Use window tools plus `request_access` and the three `event_stream_*` recording tools — as a standalone MCP stdio server over the same engine, so Codex CLI, Claude Code, or any MCP client can drive the harness's computer use. The bin keeps the harness packages external like every other entry (`@deepseek-ai/dsh-subprocess-local` ships node-pty, a native module that cannot be bundled), so it runs wherever `pnpm install` has materialized the dependencies:
+The `@zibokapi/dsh-codex-computer-use/computer-mcp` bin exposes the same surface — the official ten Codex Computer Use window tools plus `request_access` and the three `event_stream_*` recording tools — as a standalone MCP stdio server over the same engine, so Codex CLI, Claude Code, or any MCP client can drive the harness's computer use. The bin keeps the harness packages external like every other entry (`@deepseek-ai/dsh-subprocess-local` ships node-pty, a native module that cannot be bundled), so it runs wherever `pnpm install` has materialized the dependencies:
 
 ```sh
 # from this checkout, after `pnpm run build`
 node lib/mcp.js /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
 # or with the environment override
-DSH_COMPUTER_HELPER_PATH=/absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon @geohotstan/dsh-codex-computer-use/computer-mcp
+DSH_COMPUTER_HELPER_PATH=/absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon @zibokapi/dsh-codex-computer-use/computer-mcp
 ```
 
 The server speaks newline-delimited JSON-RPC 2.0 on stdin/stdout, answers `initialize` / `ping` / `tools/list` / `tools/call`, and mirrors the official response behavior: action tools answer with the post-action state (text plus a JPEG image block when one was captured).
@@ -118,7 +118,7 @@ pnpm run build     # esbuild → lib/, tsc → lib/types
 
 - CI `check` job (Ubuntu): a clean `pnpm install` from npm — the user-facing path — then typecheck and build against the published `@deepseek-ai/*` packages.
 - CI `native` job (macOS): builds and unit-tests the Swift helper daemon, and runs the Node test suite — the engine is macOS-only by design (it throws a platform gate on non-darwin hosts), so the tests that boot it live here and drive a fake daemon, touching no live desktop.
-- CI `install` job (Ubuntu): runs the documented chains against the real CLI — `dsh plugin --profile ci add` from both the checkout path and a packed tarball — then composes the profile and asserts the bundle layer registered, the three rows composed, and every `@geohotstan/dsh-codex-computer-use/*` row resolves and loads through the installed package.
+- CI `install` job (Ubuntu): runs the documented chains against the real CLI — `dsh plugin --profile ci add` from both the checkout path and a packed tarball — then composes the profile and asserts the bundle layer registered, the three rows composed, and every `@zibokapi/dsh-codex-computer-use/*` row resolves and loads through the installed package.
 
 ## License
 

@@ -1,13 +1,13 @@
 /**
- * Package-owned invariant companion for `@geohotstan/dsh-codex-computer-use/computer-mcp`.
- * @module @geohotstan/dsh-codex-computer-use/computer-mcp/invariant
+ * Package-owned invariant companion for `@zibokapi/dsh-codex-computer-use/computer-mcp`.
+ * @module @zibokapi/dsh-codex-computer-use/computer-mcp/invariant
  */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = '@geohotstan/dsh-codex-computer-use/computer-mcp'
+const PACKAGE_NAME = '@zibokapi/dsh-codex-computer-use/computer-mcp'
 
 /** Cordis companion plugin name. */
 export const name = 'computer-mcp-invariant'

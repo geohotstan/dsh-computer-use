@@ -10,7 +10,7 @@
  * approved apps; and the model receives the four-tier guidance Codex ships
  * as its SKILL.md. Without an approval service mounted, the registry's `ask`
  * resolution degrades to denial, so the gate fails closed.
- * @module @geohotstan/dsh-codex-computer-use/computer-policy
+ * @module @zibokapi/dsh-codex-computer-use/computer-policy
  */
 
 import type { Context } from '@deepseek-ai/cordis'

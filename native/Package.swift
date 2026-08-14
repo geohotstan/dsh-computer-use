@@ -1,5 +1,5 @@
 // swift-tools-version: 5.10
-// The resident macOS computer-use helper for @geohotstan/dsh-codex-computer-use/computer-local.
+// The resident macOS computer-use helper for @zibokapi/dsh-codex-computer-use/computer-local.
 // Build: swift build -c release --package-path native
 // then bundle+sign with scripts/bundle.sh (run `pnpm run build:native`). The
 // signed app at native/.build/dsh-computer-daemon.app is the helperPath the TS

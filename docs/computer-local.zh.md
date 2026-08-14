@@ -1,4 +1,4 @@
-# @geohotstan/dsh-codex-computer-use/computer-local
+# @zibokapi/dsh-codex-computer-use/computer-local
 
 [English](README.md) | 中文
 
@@ -41,7 +41,7 @@
 
 ## Model Experience
 
-Indirectly, through the model-facing tools of `@geohotstan/dsh-codex-computer-use/computer-tools`; the provider backend registers no prompt, schema, or result of its own.
+Indirectly, through the model-facing tools of `@zibokapi/dsh-codex-computer-use/computer-tools`; the provider backend registers no prompt, schema, or result of its own.
 
 #### KV Cache effect
 
