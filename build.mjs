@@ -1,5 +1,5 @@
 /**
- * Single-package build for dsh-computer-use.
+ * Single-package build for @geohotstan/dsh-codex-computer-use.
  *
  * Two artifact families:
  *
@@ -9,7 +9,7 @@
  *   package is one unit, exactly like the interconnect plugin — while every
  *   `@deepseek-ai/*` package stays external: the harness profile provides
  *   them at runtime (the profile mirror resolves them for installed bundles).
- * - The MCP server binary (`lib/mcp.js`, the `dsh-computer-mcp` bin): a
+ * - The MCP server binary (`lib/mcp.js`, the `@geohotstan/dsh-codex-computer-use/computer-mcp` bin): a
  *   standalone stdio server, so it bundles EVERYTHING including the
  *   @deepseek-ai/* packages and schemastery; only Node builtins stay
  *   external. It must run on a machine with just Node, no harness install.
@@ -41,7 +41,7 @@ const targets = [
     { entry: `src/${area}/index.ts`, outfile: `lib/${area}/index.js`, bundle: true, external: HOST_EXTERNAL },
     { entry: `src/${area}/invariant.ts`, outfile: `lib/${area}/invariant.js`, bundle: true, external: HOST_EXTERNAL },
   ]),
-  // The MCP stdio server binary (`dsh-computer-mcp`). It shares the harness
+  // The MCP stdio server binary (`@geohotstan/dsh-codex-computer-use/computer-mcp`). It shares the harness
   // externals with the plugin entries: `@deepseek-ai/dsh-subprocess-local`
   // pulls node-pty, a native module whose `.node` binaries cannot be bundled,
   // so inlining @deepseek-ai/* is off the table — the runtime dependencies

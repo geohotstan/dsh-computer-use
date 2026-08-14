@@ -5,7 +5,7 @@
  * functions are pure projections of tool arguments or canonical values, so
  * they replay safely from the session log. The text formats mirror the
  * official Codex computer-use surface.
- * @module dsh-computer-tools/render
+ * @module @geohotstan/dsh-codex-computer-use/computer-tools/render
  */
 
 import { AttachmentId } from '@deepseek-ai/dsh-attachment'

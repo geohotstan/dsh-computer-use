@@ -1,4 +1,4 @@
-# dsh-computer-local
+# @geohotstan/dsh-codex-computer-use/computer-local
 
 English | [中文](README.zh.md)
 
@@ -41,7 +41,7 @@ The config registers a settings section under the seam's `computer` namespace, s
 
 ## Model Experience
 
-Indirectly, through the model-facing tools of `dsh-computer-tools`; the provider backend registers no prompt, schema, or result of its own.
+Indirectly, through the model-facing tools of `@geohotstan/dsh-codex-computer-use/computer-tools`; the provider backend registers no prompt, schema, or result of its own.
 
 #### KV Cache effect
 

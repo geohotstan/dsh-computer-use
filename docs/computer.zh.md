@@ -1,4 +1,4 @@
-# dsh-computer
+# @geohotstan/dsh-codex-computer-use/computer
 
 [English](README.md) | 中文
 
@@ -36,11 +36,11 @@
 
 ## Model Experience
 
-Indirectly, through the model-facing tools of `dsh-computer-tools`; this service interface registers no prompt, schema, or result of its own.
+Indirectly, through the model-facing tools of `@geohotstan/dsh-codex-computer-use/computer-tools`; this service interface registers no prompt, schema, or result of its own.
 
 #### KV Cache effect
 
-No direct effect: the engine's request and result types reach the model only through the consumer's tool schemas and renderers, whose reuse behavior `dsh-computer-tools` owns.
+No direct effect: the engine's request and result types reach the model only through the consumer's tool schemas and renderers, whose reuse behavior `@geohotstan/dsh-codex-computer-use/computer-tools` owns.
 
 ## Known Limitations and Deferred Work
 

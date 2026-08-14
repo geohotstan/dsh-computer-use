@@ -1,13 +1,13 @@
 /**
- * Package-owned invariant companion for `dsh-computer-policy`.
- * @module dsh-computer-policy/invariant
+ * Package-owned invariant companion for `@geohotstan/dsh-codex-computer-use/computer-policy`.
+ * @module @geohotstan/dsh-codex-computer-use/computer-policy/invariant
  */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = 'dsh-computer-policy'
+const PACKAGE_NAME = '@geohotstan/dsh-codex-computer-use/computer-policy'
 
 /** Cordis companion plugin name. */
 export const name = 'computer-policy-invariant'

@@ -6,7 +6,7 @@
  * (the ten window tools plus `request_access`), and the call responses mirror
  * the official behavior — action tools answer with the post-action state
  * (text plus a JPEG screenshot block when one was captured).
- * @module dsh-computer-mcp
+ * @module @geohotstan/dsh-codex-computer-use/computer-mcp
  */
 
 import { createInterface } from 'node:readline'

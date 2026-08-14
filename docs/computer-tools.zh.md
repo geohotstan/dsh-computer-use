@@ -1,4 +1,4 @@
-# dsh-computer-tools
+# @geohotstan/dsh-codex-computer-use/computer-tools
 
 [English](README.md) | 中文
 
@@ -28,7 +28,7 @@
 |---|---|---|
 | `enableScreenshots` | `true` | 路由支持图像时附带窗口截图；`false` 只返回树文本捕获。 |
 
-部署策略属于 `tools/pre-execute`；[`dsh-computer-policy`](../computer-policy/README.md) 提供控制动作的审批闸门。
+部署策略属于 `tools/pre-execute`；[`@geohotstan/dsh-codex-computer-use/computer-policy`](computer-policy.md) 提供控制动作的审批闸门。
 
 ## Model Experience
 

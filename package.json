@@ -1,6 +1,6 @@
 {
-  "name": "dsh-computer-use",
-  "description": "Desktop computer use for DeepSeek Harness (DSH): macOS app listing, accessibility-tree window capture, screenshots, and synthesized input — the seam, the local Swift-daemon provider, the computer_use_* tools, the approval policy, and a standalone MCP server in one installable plugin package",
+  "name": "@geohotstan/dsh-codex-computer-use",
+  "description": "Desktop computer use for DeepSeek Harness (DSH): macOS app listing, accessibility-tree window capture, screenshots, and synthesized input \u2014 the seam, the local Swift-daemon provider, the computer_use_* tools, the approval policy, and a standalone MCP server in one installable plugin package",
   "version": "0.1.0",
   "publishConfig": {
     "access": "public"

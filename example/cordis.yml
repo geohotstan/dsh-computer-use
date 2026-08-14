@@ -1,14 +1,14 @@
 # Minimal composition showing the three plugin rows. `dsh plugin add` applies
 # the equivalent via the bundle layer in the root `cordis.patch.yml`, whose
-# rows name the same `dsh-computer-use/*` subpaths. Fill `helperPath` with the
+# rows name the same `@geohotstan/dsh-codex-computer-use/*` subpaths. Fill `helperPath` with the
 # executable inside the bundled, signed daemon app (built by
 # `pnpm run build:native` at native/.build/).
 plugins:
   computer-engine:
-    plugin: dsh-computer-use/computer-local
+    plugin: '@geohotstan/dsh-codex-computer-use/computer-local'
     config:
       helperPath: /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
   computer-tools:
-    plugin: dsh-computer-use/computer-tools
+    plugin: '@geohotstan/dsh-codex-computer-use/computer-tools'
   computer-policy:
-    plugin: dsh-computer-use/computer-policy
+    plugin: '@geohotstan/dsh-codex-computer-use/computer-policy'

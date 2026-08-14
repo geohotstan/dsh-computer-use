@@ -6,7 +6,7 @@
  * the normalizations at their wire boundary and the bounds at the complete
  * result; the tool consumer applies the envelope and the request rules at
  * execute.
- * @module dsh-computer/render
+ * @module @geohotstan/dsh-codex-computer-use/computer/render
  */
 
 import type {

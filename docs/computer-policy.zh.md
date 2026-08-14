@@ -1,4 +1,4 @@
-# dsh-computer-policy
+# @geohotstan/dsh-codex-computer-use/computer-policy
 
 [English](README.md) | 中文
 

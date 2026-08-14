@@ -70,7 +70,7 @@ jobs:
   # The documented install paths, run for real: `dsh plugin --profile <name>
   # add` against the actual CLI, once from the checkout path (linked, the
   # README's manual form) and once from a packed tarball (the registry form).
-  # The package is a DSH bundle whose patch rows name `dsh-computer-use/*`
+  # The package is a DSH bundle whose patch rows name `@geohotstan/dsh-codex-computer-use/*`
   # subpaths, so each chain proves the bundle registers as a profile layer, its
   # rows compose, and every row resolves and loads through the installed
   # package. Nothing boots the daemon, so Ubuntu suffices.
@@ -104,7 +104,7 @@ jobs:
           dsh plugin --profile ci add "$GITHUB_WORKSPACE"
           node -e "
             const d = require('$DSH_HOME/profiles/ci/package.json')
-            if (!d.dsh.profile.bundles.includes('dsh-computer-use')) {
+            if (!d.dsh.profile.bundles.includes('@geohotstan/dsh-codex-computer-use')) {
               throw new Error('the bundle layer was not registered')
             }
             console.log('checkout install — bundle layer registered:', d.dsh.profile.bundles.join(', '))
@@ -114,10 +114,10 @@ jobs:
         run: |
           export DSH_HOME="$RUNNER_TEMP/dsh-home"
           pnpm pack --pack-destination "$RUNNER_TEMP"
-          dsh plugin --profile citar add "$RUNNER_TEMP"/dsh-computer-use-*.tgz
+          dsh plugin --profile citar add "$RUNNER_TEMP"/geohotstan-dsh-codex-computer-use-*.tgz
           node -e "
             const d = require('$DSH_HOME/profiles/citar/package.json')
-            if (!d.dsh.profile.bundles.includes('dsh-computer-use')) {
+            if (!d.dsh.profile.bundles.includes('@geohotstan/dsh-codex-computer-use')) {
               throw new Error('the bundle layer was not registered')
             }
             console.log('tarball install — bundle layer registered:', d.dsh.profile.bundles.join(', '))
@@ -130,11 +130,11 @@ jobs:
           dsh --profile citar --dump-config > "$RUNNER_TEMP/dump-citar.txt"
           for dump in "$RUNNER_TEMP/dump.txt" "$RUNNER_TEMP/dump-citar.txt"; do
             grep -q 'computer-engine' "$dump"
-            grep -q 'dsh-computer-use/computer-local' "$dump"
+            grep -q '@geohotstan/dsh-codex-computer-use/computer-local' "$dump"
             grep -q 'computer-tools' "$dump"
-            grep -q 'dsh-computer-use/computer-policy' "$dump"
+            grep -q '@geohotstan/dsh-codex-computer-use/computer-policy' "$dump"
           done
-          echo "composed rows referencing this bundle: $(grep -c 'dsh-computer-use/' "$RUNNER_TEMP/dump.txt")"
+          echo "composed rows referencing this bundle: $(grep -c '@geohotstan/dsh-codex-computer-use/' "$RUNNER_TEMP/dump.txt")"
 
       # Every patch row resolves through the installed package's exports map to
       # a built lib file — exactly what a profile boot does — and each entry
@@ -152,7 +152,7 @@ jobs:
               const profile = process.argv[1]
               const req = createRequire(process.env.DSH_HOME + '/profiles/' + profile + '/package.json')
               for (const sub of ['computer', 'computer-local', 'computer-tools', 'computer-policy']) {
-                const entry = req.resolve('dsh-computer-use/' + sub)
+                const entry = req.resolve('@geohotstan/dsh-codex-computer-use/' + sub)
                 if (!existsSync(entry)) throw new Error('resolved entry is missing: ' + entry)
                 const mod = await import(entry)
                 const plugin = mod.default ?? mod.apply

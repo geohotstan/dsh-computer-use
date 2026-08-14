@@ -11,7 +11,7 @@
  *
  * Deployment policy — which apps may be driven and which actions need human
  * approval — belongs in `tools/pre-execute` or a policy service, not here.
- * @module dsh-computer-tools
+ * @module @geohotstan/dsh-codex-computer-use/computer-tools
  */
 
 import type { Context } from '@deepseek-ai/cordis'
@@ -444,7 +444,7 @@ This policy governs Computer Use actions only: clicks, typing, scrolling, draggi
 - \`element index N is not in the latest capture of X\` — the UI changed since the capture; re-capture.
 - \`Accessibility permission is required\` — grant it via \`computer_use_request_access\` and System Settings > Privacy & Security > Accessibility.
 `,
-  source: 'dsh-computer-tools',
+  source: '@geohotstan/dsh-codex-computer-use/computer-tools',
 } as const
 
 export function apply(ctx: Context, config: Config = {}): void {

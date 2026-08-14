@@ -1,13 +1,13 @@
 /**
- * Package-owned invariant companion for `dsh-computer-local`.
- * @module dsh-computer-local/invariant
+ * Package-owned invariant companion for `@geohotstan/dsh-codex-computer-use/computer-local`.
+ * @module @geohotstan/dsh-codex-computer-use/computer-local/invariant
  */
 
 /* jscpd:ignore-start */
 import type { Context } from '@deepseek-ai/cordis'
 import type { InvariantInstaller } from '@deepseek-ai/dsh-invariants'
 
-const PACKAGE_NAME = 'dsh-computer-local'
+const PACKAGE_NAME = '@geohotstan/dsh-codex-computer-use/computer-local'
 
 /** Cordis companion plugin name. */
 export const name = 'computer-local-invariant'

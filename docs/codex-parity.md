@@ -1,6 +1,6 @@
 # Codex Computer Use parity reference
 
-This reference records the comparison between `dsh-computer-use` and OpenAI's Codex Computer Use plugin: the observation base, the delivery architecture, and the API-parity table. Every behavior gap catalogued from the pinned observation below is implemented; entries that closed over time left this document. All Codex behavior is stated in dsh's own words; the Codex plugin is proprietary, so none of its text is imported verbatim (see [Licensing stance](#licensing-stance)).
+This reference records the comparison between `@geohotstan/dsh-codex-computer-use` and OpenAI's Codex Computer Use plugin: the observation base, the delivery architecture, and the API-parity table. Every behavior gap catalogued from the pinned observation below is implemented; entries that closed over time left this document. All Codex behavior is stated in dsh's own words; the Codex plugin is proprietary, so none of its text is imported verbatim (see [Licensing stance](#licensing-stance)).
 
 ## Observation base
 
@@ -18,8 +18,8 @@ The statements about Codex behavior come from three pinned artifacts, not from d
 | Engine | `SkyComputerUseService` resident process | Resident Swift daemon (`dsh-computer-daemon`) over stdio JSON-RPC |
 | Screenshot | ScreenCaptureKit window capture written to a file; the model reads the `file://` URL and emits the image itself | ScreenCaptureKit window capture attached as an image block when the model route carries images |
 | App index | Spotlight query over all application bundles, 14-day last-used window | Global Spotlight query over every application bundle, 14-day window |
-| External MCP surface | The plugin's own MCP server | `dsh-computer-mcp` stdio server |
-| Approval UX | Client-side app picker with session or persistent approval, send-approval for composed messages | `dsh-computer-policy` ask-per-app gate; grants persist through the settings user layer |
+| External MCP surface | The plugin's own MCP server | `@geohotstan/dsh-codex-computer-use/computer-mcp` stdio server |
+| Approval UX | Client-side app picker with session or persistent approval, send-approval for composed messages | `@geohotstan/dsh-codex-computer-use/computer-policy` ask-per-app gate; grants persist through the settings user layer |
 
 ## API parity
 

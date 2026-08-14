@@ -1,4 +1,4 @@
-# dsh-computer-tools
+# @geohotstan/dsh-codex-computer-use/computer-tools
 
 English | [中文](README.zh.md)
 
@@ -28,7 +28,7 @@ The tool executes the cross-field rules the schema cannot express: a click addre
 |---|---|---|
 | `enableScreenshots` | `true` | Attach window screenshots when the route carries images; `false` serves tree-only captures. |
 
-Deployment policy belongs in `tools/pre-execute`; [`dsh-computer-policy`](../computer-policy/README.md) supplies the approval gate for control actions.
+Deployment policy belongs in `tools/pre-execute`; [`@geohotstan/dsh-codex-computer-use/computer-policy`](computer-policy.md) supplies the approval gate for control actions.
 
 ## Model Experience
 

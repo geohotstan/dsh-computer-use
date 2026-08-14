@@ -13,7 +13,7 @@
  * Deployment policy (which apps may be driven, which actions need approval)
  * belongs in `tools/pre-execute` or a policy service; this engine performs
  * the mechanism its caller already authorized.
- * @module dsh-computer-local
+ * @module @geohotstan/dsh-codex-computer-use/computer-local
  */
 
 import { existsSync } from 'node:fs'
@@ -523,7 +523,7 @@ export class LocalComputerEngine extends ComputerEngine {
    * Load-time TCC preflight: spawn the daemon (whose startup `requestPermissions()`
    * prompts for each missing grant) and refuse to activate until both grants
    * are present. Rejection fails this fiber, which unregisters `ctx.computer`
-   * and leaves the `dsh-computer-tools` consumer (which injects `computer`)
+   * and leaves the `@geohotstan/dsh-codex-computer-use/computer-tools` consumer (which injects `computer`)
    * unloaded as well — a missing permission means computer use is simply not
    * loaded, matching Codex's prompt-at-enable behavior.
    */
