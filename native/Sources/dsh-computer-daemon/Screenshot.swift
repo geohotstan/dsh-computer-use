@@ -78,15 +78,20 @@ enum Screenshot {
 
     // MARK: - Async bridging
 
+    /** Reference box: Swift 5.10 rejects mutating a captured `var` from concurrently-executing code, so the async result crosses the Task boundary on a captured `let` reference. */
+    private final class ShareableContentBox {
+        var content: SCShareableContent?
+    }
+
     private static func awaitShareableContent() -> SCShareableContent? {
         let semaphore = DispatchSemaphore(value: 0)
-        var content: SCShareableContent?
+        let box = ShareableContentBox()
         Task {
-            content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+            box.content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
             semaphore.signal()
         }
         _ = semaphore.wait(timeout: .now() + 10)
-        return content
+        return box.content
     }
 
     // MARK: - JPEG encoding

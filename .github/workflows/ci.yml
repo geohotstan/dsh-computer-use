@@ -20,10 +20,10 @@ jobs:
         with:
           node-version: 22
 
+      # No `version:` here — the action reads packageManager from
+      # package.json; specifying both is an error ("Multiple versions").
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 11
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -68,10 +68,10 @@ jobs:
         with:
           node-version: 22
 
+      # No `version:` here — the action reads packageManager from
+      # package.json; specifying both is an error ("Multiple versions").
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 11
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

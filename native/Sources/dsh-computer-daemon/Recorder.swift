@@ -139,37 +139,46 @@ final class Recorder {
 
     private static func startTapThread() {
         guard thread == nil else { return }
-        let worker = Thread {
-            let mask = CGEventMask(1 << CGEventType.keyDown.rawValue)
-                | CGEventMask(1 << CGEventType.keyUp.rawValue)
-                | CGEventMask(1 << CGEventType.leftMouseDown.rawValue)
-                | CGEventMask(1 << CGEventType.leftMouseUp.rawValue)
-                | CGEventMask(1 << CGEventType.rightMouseDown.rawValue)
-                | CGEventMask(1 << CGEventType.rightMouseUp.rawValue)
-                | CGEventMask(1 << CGEventType.scrollWheel.rawValue)
-                | CGEventMask(1 << CGEventType.mouseMoved.rawValue)
-            let callback = recorderTapCallback
-            guard let created = CGEvent.tapCreate(
-                tap: .cgSessionEventTap,
-                place: .headInsertEventTap,
-                options: .listenOnly,
-                eventsOfInterest: mask,
-                callback: callback,
-                userInfo: nil
-            ) else { return }
-            tap = created
-            let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, created, 0)
-            CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
-            CGEvent.tapEnable(tap: created, enable: true)
-            while !Thread.current.isCancelled {
-                CFRunLoopRunInMode(.defaultMode, 0.1, false)
-            }
-            CGEvent.tapEnable(tap: created, enable: false)
-            CFMachPortInvalidate(created)
-        }
+        let worker = Thread(block: runTapLoop)
         worker.name = "dsh-computer-recorder"
         thread = worker
         worker.start()
+    }
+
+    /**
+     * The tap thread's run loop: install the listen-only event tap, pump the
+     * run loop until the thread is cancelled, then tear the tap down.
+     * A separate method (not a big trailing closure) keeps this a sequence of
+     * small expressions — the single giant closure body exceeds Swift 5.10's
+     * expression type-check budget on the CI toolchain.
+     */
+    private static func runTapLoop() {
+        let mask: CGEventMask = CGEventMask(1 << CGEventType.keyDown.rawValue)
+            | CGEventMask(1 << CGEventType.keyUp.rawValue)
+            | CGEventMask(1 << CGEventType.leftMouseDown.rawValue)
+            | CGEventMask(1 << CGEventType.leftMouseUp.rawValue)
+            | CGEventMask(1 << CGEventType.rightMouseDown.rawValue)
+            | CGEventMask(1 << CGEventType.rightMouseUp.rawValue)
+            | CGEventMask(1 << CGEventType.scrollWheel.rawValue)
+            | CGEventMask(1 << CGEventType.mouseMoved.rawValue)
+        let callback = recorderTapCallback
+        guard let created = CGEvent.tapCreate(
+            tap: .cgSessionEventTap,
+            place: .headInsertEventTap,
+            options: .listenOnly,
+            eventsOfInterest: mask,
+            callback: callback,
+            userInfo: nil
+        ) else { return }
+        tap = created
+        let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, created, 0)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, .commonModes)
+        CGEvent.tapEnable(tap: created, enable: true)
+        while !Thread.current.isCancelled {
+            CFRunLoopRunInMode(.defaultMode, 0.1, false)
+        }
+        CGEvent.tapEnable(tap: created, enable: false)
+        CFMachPortInvalidate(created)
     }
 
     private static func stopTapThread() {
