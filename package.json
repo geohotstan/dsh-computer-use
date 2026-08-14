@@ -4,6 +4,44 @@
   "private": true,
   "description": "Standalone DeepSeek Harness plugin: desktop computer use on macOS — app listing, accessibility-tree window capture, screenshots, and synthesized mouse/keyboard input, cloned from Codex Computer Use",
   "type": "module",
+  "exports": {
+    "./computer": {
+      "types": "./packages/computer/lib/types/index.d.ts",
+      "default": "./packages/computer/lib/index.js"
+    },
+    "./computer-local": {
+      "types": "./packages/computer-local/lib/types/index.d.ts",
+      "default": "./packages/computer-local/lib/index.js"
+    },
+    "./computer-tools": {
+      "types": "./packages/computer-tools/lib/types/index.d.ts",
+      "default": "./packages/computer-tools/lib/index.js"
+    },
+    "./computer-policy": {
+      "types": "./packages/computer-policy/lib/types/index.d.ts",
+      "default": "./packages/computer-policy/lib/index.js"
+    },
+    "./computer-mcp": {
+      "types": "./packages/computer-mcp/lib/types/index.d.ts",
+      "default": "./packages/computer-mcp/lib/index.js"
+    },
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "files": [
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md",
+    "LICENSE",
+    "packages/*/lib/**/*.js",
+    "packages/*/lib/**/*.d.ts",
+    "packages/computer-local/native"
+  ],
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -b packages/computer packages/computer-local packages/computer-tools packages/computer-policy packages/computer-mcp --pretty false && tsc -p tsconfig.tests.json",

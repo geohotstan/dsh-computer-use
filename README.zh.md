@@ -8,36 +8,51 @@
 
 与 OpenAI 实现之间的完整功能差异见 [docs/codex-parity.md](docs/codex-parity.md)，该参考文档即对齐清单。
 
+## 安装
+
+本仓库是一个 DSH bundle：根 `package.json` 声明 `dsh.bundle.patch` → [`cordis.patch.yml`](cordis.patch.yml)，后者插入三行 host 插件。像安装其他 bundle 一样从检出安装它。
+
+### 懒人版
+
+对你的 dsh 说：
+
+```
+安装一下这个插件包：https://github.com/geohotstan/dsh-computer-use
+```
+
+### 手动
+
+```sh
+git clone https://github.com/geohotstan/dsh-computer-use
+cd dsh-computer-use
+pnpm install
+pnpm run build            # 构建各插件包的 host lib/
+pnpm run build:native     # 构建、签名并打包守护进程（每台机器一次；需要 Xcode 命令行工具）
+cd <你运行 dsh 的目录>
+dsh plugin --profile <名字> add ../dsh-computer-use
+```
+
+`dsh plugin add` 会把仓库注册为 profile 的一层 bundle（`dsh.profile.bundles`）。它的行以 `dsh-computer-use/*` 子路径命名，因此一切都通过链接的检出解析——不需要安装任何兄弟包依赖。然后把 `helperPath`（或 `DSH_COMPUTER_HELPER_PATH`）指向签名包内的守护进程可执行文件，并重启 web 服务：
+
+```sh
+# helper: <检出目录>/packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
+```
+
+请保持检出路径固定——macOS 以助手的 bundle id、代码签名和磁盘路径为键记录 TCC 授权（见[权限](#权限)）。
+
 ## 包
 
 | 包 | 角色 | 加载行 |
 |---|---|---|
 | [`dsh-computer`](packages/computer/README.md) | 服务定义——`ctx.computer` | 由 `computer-local` 注册 |
-| [`dsh-computer-local`](packages/computer-local/README.md) | 本地提供者——常驻 Swift 守护进程（AX 树、截图、CGEvent 输入） | `plugin: dsh-computer-local` |
-| [`dsh-computer-tools`](packages/computer-tools/README.md) | `computer_use_*` 工具与 `computer-use` skill | `plugin: dsh-computer-tools` |
-| [`dsh-computer-policy`](packages/computer-policy/README.md) | 按应用审批闸门、Codex 风格分级指引与 `computer_use_list_granted_applications` | `plugin: dsh-computer-policy` |
+| [`dsh-computer-local`](packages/computer-local/README.md) | 本地提供者——常驻 Swift 守护进程（AX 树、截图、CGEvent 输入） | `dsh-computer-use/computer-local` |
+| [`dsh-computer-tools`](packages/computer-tools/README.md) | `computer_use_*` 工具与 `computer-use` skill | `dsh-computer-use/computer-tools` |
+| [`dsh-computer-policy`](packages/computer-policy/README.md) | 按应用审批闸门、Codex 风格分级指引与 `computer_use_list_granted_applications` | `dsh-computer-use/computer-policy` |
 | [`dsh-computer-mcp`](packages/computer-mcp/README.md) | 独立 MCP stdio 服务器，为外部 MCP 客户端暴露同一表面 | 非加载行——独立二进制 |
-
-## 安装
-
-插件依赖已发布的 harness 包（`@deepseek-ai/dsh-*`、`@deepseek-ai/cordis`、`@deepseek-ai/schemastery`）。发布这四个包（或把本文件夹作为额外 workspace 加入同一检出后安装），然后：
-
-```sh
-pnpm add dsh-computer-local dsh-computer-tools dsh-computer-policy
-```
-
-构建原生助手（每个发布版一次；需要 Xcode 命令行工具）。这一步会构建 Swift 二进制**并**将其打包为签名的 `.app`——正是这一步让 macOS 把 TCC 权限提示归属给助手，而不是托管 harness 的终端：
-
-```sh
-pnpm run build:native
-# helper: packages/computer-local/native/.build/dsh-computer-daemon.app
-```
-
-`helperPath` 必须指向包内的可执行文件：`packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon`。
 
 ## 组合
 
-把行加入 harness 组合（`cordis.yml` 或 profile 补丁）。`helperPath` 必须指向打包后的守护进程可执行文件；其余行可选（`dsh-computer-policy` 需要挂载审批服务，例如 `@deepseek-ai/dsh-user-approval`）。
+手工编写组合（在 harness 源码树内，包以 workspace 或已发布依赖形式存在）时使用裸包名：
 
 ```yaml
 plugins:
@@ -51,7 +66,7 @@ plugins:
     plugin: dsh-computer-policy
 ```
 
-可运行组合见 [`example/cordis.yml`](example/cordis.yml)。
+`helperPath` 必须指向打包后的守护进程可执行文件；其余行可选（`dsh-computer-policy` 需要挂载审批服务，例如 `@deepseek-ai/dsh-user-approval`）。可运行组合见 [`example/cordis.yml`](example/cordis.yml)。
 
 ## MCP 服务器
 
@@ -86,6 +101,12 @@ pnpm test          # fake-daemon tests; nothing touches a live desktop
 pnpm run typecheck
 pnpm run build     # emits lib/ for all four packages
 ```
+
+## 验证
+
+- CI `check` 任务（Ubuntu）：从 npm 全新 `pnpm install`——正是用户走的路径——然后 typecheck、test、build。测试驱动一个 fake daemon，因此不需要桌面、macOS 权限或原生构建。
+- CI `native` 任务（macOS）：构建并单测 Swift 助手守护进程。
+- CI `install` 任务（Ubuntu）：对真实 CLI 跑文档里的安装链路——`dsh plugin --profile ci add <检出目录>`——然后组合 profile，断言 bundle 层已注册、三行已组合、且每个 `dsh-computer-use/*` 行都能通过链接的检出解析到已构建的 `lib/`。
 
 ## 许可证
 

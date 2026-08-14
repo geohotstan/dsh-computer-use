@@ -4,23 +4,28 @@
 # register into the host registries, so every preset in the profile (standard,
 # creator/cordis, code) sees the computer_use_* tools.
 #
+# The rows name THIS package's subpaths (`dsh-computer-use/*`, resolved through
+# the profile's node_modules via the exports map in the root package.json), so
+# installing the repo itself (`dsh plugin --profile <name> add <checkout>`)
+# brings everything along — no sibling-package deps to resolve.
+#
 # helperPath: the executable inside the bundled, signed daemon app. When
 # omitted, the engine falls back to the DSH_COMPUTER_HELPER_PATH environment
 # variable. Set it per-machine (build with `pnpm run build:native` first):
-#   <plugin-root>/packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
+#   <checkout>/packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
 
 - insert:
     - id: computer-engine
-      name: dsh-computer-local
+      name: dsh-computer-use/computer-local
       config:
         timeoutMs: 30000
 
     - id: computer-tools
-      name: dsh-computer-tools
+      name: dsh-computer-use/computer-tools
       config:
         enableScreenshots: true
 
     - id: computer-policy
-      name: dsh-computer-policy
+      name: dsh-computer-use/computer-policy
       config:
         allowlistApps: []

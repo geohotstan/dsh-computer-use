@@ -8,36 +8,51 @@ The design is accessibility-tree-first: `computer_use_get_app_state` returns a n
 
 The complete feature delta against OpenAI's implementation lives in [docs/codex-parity.md](docs/codex-parity.md); that reference is the parity checklist.
 
+## Install
+
+This repository is a DSH bundle: the root `package.json` declares `dsh.bundle.patch` → [`cordis.patch.yml`](cordis.patch.yml), which inserts the three host rows. Install it from a checkout, like any other bundle.
+
+### Lazy path
+
+Tell your dsh:
+
+```
+Install this plugin package: https://github.com/geohotstan/dsh-computer-use
+```
+
+### Manual
+
+```sh
+git clone https://github.com/geohotstan/dsh-computer-use
+cd dsh-computer-use
+pnpm install
+pnpm run build            # host lib/ for the plugin packages
+pnpm run build:native     # build + sign + bundle the daemon (once per machine; Xcode CLT required)
+cd <where you run dsh>
+dsh plugin --profile <name> add ../dsh-computer-use
+```
+
+`dsh plugin add` registers the repo as a bundle layer in the profile (`dsh.profile.bundles`). Its rows name `dsh-computer-use/*` subpaths, so everything resolves through the linked checkout — no sibling-package dependencies to install. Then point `helperPath` (or `DSH_COMPUTER_HELPER_PATH`) at the daemon executable inside the signed bundle and restart the web service:
+
+```sh
+# helper: <checkout>/packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
+```
+
+Keep the checkout at a fixed path — macOS keys the TCC grants on the helper's bundle id, code signature, and on-disk path (see [Permissions](#permissions)).
+
 ## Packages
 
 | Package | Role | Loader row |
 |---|---|---|
 | [`dsh-computer`](packages/computer/README.md) | Service Definition — `ctx.computer` | `computer-local` registers it |
-| [`dsh-computer-local`](packages/computer-local/README.md) | Local provider — resident Swift daemon (AX tree, screenshots, CGEvent input) | `plugin: dsh-computer-local` |
-| [`dsh-computer-tools`](packages/computer-tools/README.md) | The `computer_use_*` tools plus the `computer-use` skill | `plugin: dsh-computer-tools` |
-| [`dsh-computer-policy`](packages/computer-policy/README.md) | Per-app approval gate + Codex-style tier guidance + `computer_use_list_granted_applications` | `plugin: dsh-computer-policy` |
+| [`dsh-computer-local`](packages/computer-local/README.md) | Local provider — resident Swift daemon (AX tree, screenshots, CGEvent input) | `dsh-computer-use/computer-local` |
+| [`dsh-computer-tools`](packages/computer-tools/README.md) | The `computer_use_*` tools plus the `computer-use` skill | `dsh-computer-use/computer-tools` |
+| [`dsh-computer-policy`](packages/computer-policy/README.md) | Per-app approval gate + Codex-style tier guidance + `computer_use_list_granted_applications` | `dsh-computer-use/computer-policy` |
 | [`dsh-computer-mcp`](packages/computer-mcp/README.md) | Standalone MCP stdio server exposing the same surface for external MCP clients | not a loader row — a binary |
-
-## Install
-
-The plugin depends on the published harness packages (`@deepseek-ai/dsh-*`, `@deepseek-ai/cordis`, `@deepseek-ai/schemastery`). Publish the four packages (or install them from a checkout that joins this folder as an extra workspace), then:
-
-```sh
-pnpm add dsh-computer-local dsh-computer-tools dsh-computer-policy
-```
-
-Build the native helper (once per release; Xcode command-line tools required). This builds the Swift binary **and** bundles it into a signed `.app`, which is what makes macOS attribute the TCC permission prompts to the helper instead of the terminal hosting the harness:
-
-```sh
-pnpm run build:native
-# helper: packages/computer-local/native/.build/dsh-computer-daemon.app
-```
-
-`helperPath` must point at the executable **inside** the bundle: `packages/computer-local/native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon`.
 
 ## Compose
 
-Add the rows to a harness composition (`cordis.yml` or a profile patch). `helperPath` must point at the bundled daemon executable; the other rows are optional (`dsh-computer-policy` needs an approval service mounted, e.g. `@deepseek-ai/dsh-user-approval`).
+Authoring a composition by hand (inside the harness source tree, where the packages are workspace or published dependencies) uses the bare package names:
 
 ```yaml
 plugins:
@@ -51,7 +66,7 @@ plugins:
     plugin: dsh-computer-policy
 ```
 
-A runnable composition lives in [`example/cordis.yml`](example/cordis.yml).
+`helperPath` must point at the bundled daemon executable; the other rows are optional (`dsh-computer-policy` needs an approval service mounted, e.g. `@deepseek-ai/dsh-user-approval`). A runnable composition lives in [`example/cordis.yml`](example/cordis.yml).
 
 ## MCP server
 
@@ -86,6 +101,12 @@ pnpm test          # fake-daemon tests; nothing touches a live desktop
 pnpm run typecheck
 pnpm run build     # emits lib/ for all four packages
 ```
+
+## Verification
+
+- CI `check` job (Ubuntu): a clean `pnpm install` from npm — the user-facing path — then typecheck, test, and build. Tests drive a fake daemon, so no desktop, macOS permissions, or native build are required.
+- CI `native` job (macOS): builds and unit-tests the Swift helper daemon.
+- CI `install` job (Ubuntu): runs the documented chain against the real CLI — `dsh plugin --profile ci add <checkout>` — then composes the profile and asserts the bundle layer registered, the three rows composed, and every `dsh-computer-use/*` row resolves to built `lib/` through the linked checkout.
 
 ## License
 
