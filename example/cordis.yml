@@ -1,13 +1,11 @@
 # Minimal composition showing the three plugin rows. `dsh plugin add` applies
 # the equivalent via the bundle layer in the root `cordis.patch.yml`, whose
-# rows name the same `@zibokapi/dsh-codex-computer-use/*` subpaths. Fill `helperPath` with the
-# executable inside the bundled, signed daemon app (built by
-# `pnpm run build:native` at native/.build/).
+# rows name the same `@zibokapi/dsh-codex-computer-use/*` subpaths. `helperPath`
+# is optional: after `npx @zibokapi/dsh-codex-computer-use` the engine finds the
+# installed daemon on its own; set it only to point at a custom build.
 plugins:
   computer-engine:
     plugin: '@zibokapi/dsh-codex-computer-use/computer-local'
-    config:
-      helperPath: /absolute/path/to/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon
   computer-tools:
     plugin: '@zibokapi/dsh-codex-computer-use/computer-tools'
   computer-policy:

@@ -7,12 +7,21 @@
   },
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geohotstan/dsh-computer-use.git"
+  },
+  "bugs": {
+    "url": "https://github.com/geohotstan/dsh-computer-use/issues"
+  },
+  "homepage": "https://github.com/geohotstan/dsh-computer-use#readme",
   "engines": {
-    "node": "^22.19.0 || >=24.0.0"
+    "node": ">=22.19.0"
   },
   "main": "lib/index.js",
   "types": "lib/types/index.d.ts",
   "bin": {
+    "dsh-codex-computer-use": "lib/setup.js",
     "dsh-computer-mcp": "lib/mcp.js"
   },
   "exports": {
@@ -72,6 +81,7 @@
     "lib",
     "native/Package.swift",
     "native/Sources",
+    "native/Tests",
     "native/scripts",
     "cordis.patch.yml",
     "README.md",
@@ -81,10 +91,10 @@
   ],
   "scripts": {
     "build": "node build.mjs",
-    "prepare": "node build.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check": "pnpm run typecheck && pnpm run test && pnpm run build",
+    "prepublishOnly": "node build.mjs",
     "build:native": "swift build -c release --package-path native && bash native/scripts/bundle.sh"
   },
   "dependencies": {

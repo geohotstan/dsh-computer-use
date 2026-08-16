@@ -1,5 +1,8 @@
 node_modules/
-lib/
+# lib/ is committed: git-hosted installs (the README's lazy path) must work
+# without running build scripts — pnpm ≥10 blocks lifecycle scripts of
+# git-hosted dependencies unless the consumer allowlists them, so the built
+# entries have to ship in the snapshot itself.
 *.tsbuildinfo
 native/.build/
 coverage/

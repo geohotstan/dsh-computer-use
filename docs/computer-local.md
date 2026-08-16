@@ -6,7 +6,7 @@ Local Service Provider for the computer-use seam: `LocalComputerEngine` drives a
 
 ## What the daemon does
 
-Built with `pnpm run build:native`, which compiles `native/` with `swift build -c release` and then bundles the binary into the signed app at `native/.build/dsh-computer-daemon.app` (`native/scripts/bundle.sh` owns the layout and signing). `helperPath` must point at the executable inside that bundle — `native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon` — whose bundle identity is what makes macOS attribute the TCC prompts to the helper. It prefers public macOS APIs (Accessibility, ScreenCaptureKit, CGEvent) and adds a private SkyLight fast path for background input delivery, resolved dynamically with a public fallback per symbol:
+Built by the setup command (`npx @zibokapi/dsh-codex-computer-use`, or `pnpm run build:native` in a checkout), which compiles `native/` with `swift build -c release`, then bundles and signs the binary into a `.app` (`native/scripts/bundle.sh` owns the layout and signing) and installs it at `$DSH_HOME/computer-use/dsh-computer-daemon.app` (default `~/.dsh/computer-use`) — a stable path, so the TCC grants keyed on it survive plugin updates. The engine's `helperPath` resolution order is: config → `DSH_COMPUTER_HELPER_PATH` → that install location, so after the setup command no configuration is needed. The bundle identity is what makes macOS attribute the TCC prompts to the helper. It prefers public macOS APIs (Accessibility, ScreenCaptureKit, CGEvent) and adds a private SkyLight fast path for background input delivery, resolved dynamically with a public fallback per symbol:
 
 - App listing: `NSWorkspace` running apps merged with Spotlight-installed bundles.
 - Capture: the macOS Accessibility (AX) tree serialized into the numbered, tab-indented, trait-annotated element-index format, plus a `ScreenCaptureKit` window screenshot (JPEG) with a brief highlight overlay. Consecutive captures return the diff marker lines.
@@ -18,7 +18,7 @@ The daemon requires the macOS **Accessibility** and **Screen Recording** TCC gra
 
 | Field | Default | Purpose |
 |---|---|---|
-| `helperPath` | (required) | Absolute path to the daemon executable inside the bundled `.app`; `DSH_COMPUTER_HELPER_PATH` is the environment override. Missing at load fails loud. |
+| `helperPath` | (optional) | Absolute path to the daemon executable inside the bundled `.app`; `DSH_COMPUTER_HELPER_PATH` is the environment override; unset, the engine falls back to the setup command's install location (`$DSH_HOME/computer-use/…`). All three missing at load fails loud with the one-line fix. |
 | `helperArgs` | `[]` | Extra argv entries appended after the daemon path. |
 | `timeoutMs` | `15_000` | Default per-request timeout. |
 | `maxTimeoutMs` | `120_000` | Cap for per-request timeout overrides. |

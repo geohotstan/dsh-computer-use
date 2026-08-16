@@ -14,8 +14,11 @@
  *   @deepseek-ai/* packages and schemastery; only Node builtins stay
  *   external. It must run on a machine with just Node, no harness install.
  *
- * `prepare` runs this after a git install, so it must not assume a sibling
- * checkout, project references, or a type-check pass.
+ * `lib/` is committed and this runs on demand (`pnpm run build`) and before
+ * publishing (`prepublishOnly`), never as a dependency's install script —
+ * pnpm ≥10 blocks those for git-hosted packages, so git installs rely on the
+ * committed artifacts instead. The build must not assume a sibling checkout,
+ * project references, or a type-check pass.
  *
  * Type declarations are emitted separately by `tsc -p tsconfig.build.json`
  * into `lib/types` (esbuild strips types), mirroring the published shape the
@@ -51,6 +54,16 @@ const targets = [
     outfile: 'lib/mcp.js',
     bundle: true,
     external: HOST_EXTERNAL,
+  },
+  // The setup binary (`dsh-codex-computer-use`, the `npx` entry). It bundles
+  // EVERYTHING including the relative paths import — it must run standalone
+  // under npx, where no profile, no peer dependency, and no harness install
+  // exists, so it may import nothing beyond Node builtins and pure local files.
+  // The shebang lives in the source file; esbuild keeps it at output line 1.
+  {
+    entry: 'src/setup/cli.ts',
+    outfile: 'lib/setup.js',
+    bundle: true,
   },
 ]
 

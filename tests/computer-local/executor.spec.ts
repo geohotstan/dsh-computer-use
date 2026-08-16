@@ -6,10 +6,10 @@
  * stay real. No live desktop is driven here.
  */
 
-import { mkdtempSync, readFileSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import { LocalComputerEngine, HELPER_PATH_ENV, assertServiceableComputerConfig } from '../../src/computer-local/index.ts'
@@ -63,9 +63,13 @@ describe('LocalComputerEngine construction', () => {
 
   it('fails loud when no daemon path is configured or the path is missing', async () => {
     vi.stubEnv(HELPER_PATH_ENV, '')
+    // Anchor the setup-CLI install fallback inside the empty temp root, so the
+    // unconfigured engine deterministically finds no daemon on any machine.
+    vi.stubEnv('DSH_HOME', tmpRoot)
     const ctx = new Context()
     await ctx.plugin(LocalSubprocessRuntime)
-    await expect(ctx.plugin(LocalComputerEngine, {})).rejects.toThrow(/no computer-use daemon/)
+    await expect(ctx.plugin(LocalComputerEngine, {}))
+      .rejects.toThrow(/no computer-use daemon .*npx @zibokapi\/dsh-codex-computer-use/)
     await expect(ctx.plugin(LocalComputerEngine, { helperPath: resolve(tmpRoot, 'missing-daemon') }))
       .rejects.toThrow(/no computer-use daemon/)
     await ctx.fiber.dispose()
@@ -77,6 +81,26 @@ describe('LocalComputerEngine construction', () => {
     contexts.push(ctx)
     await ctx.plugin(LocalSubprocessRuntime)
     await ctx.plugin(LocalComputerEngine, { helperArgs: [fixturePath] })
+    const apps = await ctx.computer.listApps(ctx.computer.resolve({}))
+    expect(apps[0]?.id).toBe('com.apple.TextEdit')
+  })
+
+  it('falls back to the setup CLI install location when nothing is configured', async () => {
+    vi.stubEnv(HELPER_PATH_ENV, '')
+    const home = join(tmpRoot, 'fallback-home')
+    vi.stubEnv('DSH_HOME', home)
+    // An executable fake daemon at the exact path `npx @zibokapi/dsh-codex-computer-use`
+    // installs: a shebang script that evaluates the fake-daemon fixture module.
+    const executable = join(
+      home, 'computer-use', 'dsh-computer-daemon.app', 'Contents', 'MacOS', 'dsh-computer-daemon',
+    )
+    mkdirSync(dirname(executable), { recursive: true })
+    writeFileSync(executable, `#!/usr/bin/env node\nimport(${JSON.stringify(pathToFileURL(fixturePath).href)})\n`)
+    chmodSync(executable, 0o755)
+    const ctx = new Context()
+    contexts.push(ctx)
+    await ctx.plugin(LocalSubprocessRuntime)
+    await ctx.plugin(LocalComputerEngine, {})
     const apps = await ctx.computer.listApps(ctx.computer.resolve({}))
     expect(apps[0]?.id).toBe('com.apple.TextEdit')
   })
@@ -203,6 +227,7 @@ describe('LocalComputerEngine operations', () => {
     // re-resolves the path and fails loud.
     await expect(ctx.computer.getAppState(ctx.computer.resolve<GetAppStateRequest>({ app: 'crash' }))).rejects.toThrow(/daemon exited unexpectedly/)
     vi.stubEnv(HELPER_PATH_ENV, '')
+    vi.stubEnv('DSH_HOME', tmpRoot)
     await expect(ctx.computer.listApps(ctx.computer.resolve<ListAppsRequest>({}))).rejects.toThrow(/no computer-use daemon/)
   })
 

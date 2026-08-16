@@ -6,7 +6,7 @@
 
 ## 守护进程职责
 
-用 `pnpm run build:native` 构建：先用 `swift build -c release` 编译 `native/`，再把二进制打包为 `native/.build/dsh-computer-daemon.app` 签名的应用（`native/scripts/bundle.sh` 负责布局与签名）。`helperPath` 必须指向包内的可执行文件——`native/.build/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon`——正是这个 bundle 身份让 macOS 把 TCC 提示归属给助手。它优先使用公开 macOS API（Accessibility、ScreenCaptureKit、CGEvent），并为后台输入投递增加私有 SkyLight 快速路径，动态解析并逐符号回退到公开路径：
+由安装命令构建（`npx @zibokapi/dsh-codex-computer-use`，或检出内 `pnpm run build:native`）：先用 `swift build -c release` 编译 `native/`，再由 `native/scripts/bundle.sh` 打包并签名为 `.app`，安装到 `$DSH_HOME/computer-use/dsh-computer-daemon.app`（默认 `~/.dsh/computer-use`）——路径固定，因此以其为键的 TCC 授权在插件更新后依然有效。引擎解析 `helperPath` 的顺序为：配置 → `DSH_COMPUTER_HELPER_PATH` → 该安装位置，安装命令执行后无需任何配置。正是这个 bundle 身份让 macOS 把 TCC 提示归属给助手。它优先使用公开 macOS API（Accessibility、ScreenCaptureKit、CGEvent），并为后台输入投递增加私有 SkyLight 快速路径，动态解析并逐符号回退到公开路径：
 
 - 应用列举：`NSWorkspace` 运行中的应用与 Spotlight 已安装应用合并。
 - 捕获：macOS 辅助功能（AX）树序列化为带编号、制表缩进、特征标注的元素索引格式，外加 `ScreenCaptureKit` 窗口截图（JPEG）与短暂的框选高亮。连续捕获返回差异标记行。
@@ -18,7 +18,7 @@
 
 | 字段 | 默认值 | 用途 |
 |---|---|---|
-| `helperPath` | （必填） | 打包后 `.app` 内守护进程可执行文件的绝对路径；`DSH_COMPUTER_HELPER_PATH` 为环境变量覆盖。加载时缺失即报错。 |
+| `helperPath` | （可选） | 打包后 `.app` 内守护进程可执行文件的绝对路径；`DSH_COMPUTER_HELPER_PATH` 为环境变量覆盖；均未设置时回退到安装命令的安装位置（`$DSH_HOME/computer-use/…`）。三者皆缺失时加载报错并给出单行修复指引。 |
 | `helperArgs` | `[]` | 追加在守护进程路径后的 argv 项。 |
 | `timeoutMs` | `15_000` | 单请求默认超时。 |
 | `maxTimeoutMs` | `120_000` | 单请求超时覆盖的上限。 |

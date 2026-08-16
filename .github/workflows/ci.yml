@@ -67,6 +67,19 @@ jobs:
       - name: Test (Node)
         run: pnpm test
 
+      # The documented setup command's build half, end to end: the shipped
+      # lib/setup.js builds the Swift daemon from the package's native/
+      # directory, bundles and signs it, and installs it to a directory the
+      # engine would find. The permission ask is skipped — headless runners
+      # cannot answer TCC dialogs; macOS CI users exercise it via the unit
+      # tests and the real-flow coverage below.
+      - name: Exercise the setup CLI end to end
+        run: |
+          node lib/setup.js --install-dir "$RUNNER_TEMP/computer-use" --skip-permission-prompt
+          test -x "$RUNNER_TEMP/computer-use/dsh-computer-daemon.app/Contents/MacOS/dsh-computer-daemon"
+          codesign --verify --strict "$RUNNER_TEMP/computer-use/dsh-computer-daemon.app"
+          node lib/setup.js status --install-dir "$RUNNER_TEMP/computer-use"
+
   # The documented install paths, run for real: `dsh plugin --profile <name>
   # add` against the actual CLI, once from the checkout path (linked, the
   # README's manual form) and once from a packed tarball (the registry form).
@@ -110,6 +123,18 @@ jobs:
             console.log('checkout install — bundle layer registered:', d.dsh.profile.bundles.join(', '))
           "
 
+      # The setup binary must reject non-macOS hosts with one actionable line,
+      # not a stack trace — this is what a Linux user sees at the setup step.
+      - name: The setup binary explains macOS-only support elsewhere
+        run: |
+          set +e
+          OUT=$(node "$RUNNER_TEMP/dsh-home/profiles/ci/node_modules/@zibokapi/dsh-codex-computer-use/lib/setup.js" 2>&1)
+          STATUS=$?
+          set -e
+          echo "$OUT"
+          test "$STATUS" -eq 1
+          echo "$OUT" | grep -q 'macOS'
+
       - name: Add the bundle from a packed tarball
         run: |
           export DSH_HOME="$RUNNER_TEMP/dsh-home"
@@ -123,12 +148,34 @@ jobs:
             console.log('tarball install — bundle layer registered:', d.dsh.profile.bundles.join(', '))
           "
 
+      # The README's lazy path: a git-hosted URL. dsh hands pnpm a git
+      # tarball, and pnpm >= 10 blocks lifecycle scripts of git-hosted
+      # dependencies unless the consumer allowlists them — so the package
+      # must install with no build scripts at all, which is why lib/ is
+      # committed. A bare clone of this commit exercises the same pnpm code
+      # path as the GitHub URL without depending on the pushed branch state;
+      # it uses only what is committed, so it also fails if lib/ goes stale
+      # or gets re-ignored.
+      - name: Add the bundle from a git URL
+        run: |
+          export DSH_HOME="$RUNNER_TEMP/dsh-home"
+          git clone -q --bare "$GITHUB_WORKSPACE" "$RUNNER_TEMP/repo.git"
+          dsh plugin --profile cigit add "git+file://$RUNNER_TEMP/repo.git"
+          node -e "
+            const d = require('$DSH_HOME/profiles/cigit/package.json')
+            if (!d.dsh.profile.bundles.includes('@zibokapi/dsh-codex-computer-use')) {
+              throw new Error('the bundle layer was not registered')
+            }
+            console.log('git install — bundle layer registered:', d.dsh.profile.bundles.join(', '))
+          "
+
       - name: Compose both profiles
         run: |
           export DSH_HOME="$RUNNER_TEMP/dsh-home"
           dsh --profile ci --dump-config > "$RUNNER_TEMP/dump.txt"
           dsh --profile citar --dump-config > "$RUNNER_TEMP/dump-citar.txt"
-          for dump in "$RUNNER_TEMP/dump.txt" "$RUNNER_TEMP/dump-citar.txt"; do
+          dsh --profile cigit --dump-config > "$RUNNER_TEMP/dump-cigit.txt"
+          for dump in "$RUNNER_TEMP/dump.txt" "$RUNNER_TEMP/dump-citar.txt" "$RUNNER_TEMP/dump-cigit.txt"; do
             grep -q 'computer-engine' "$dump"
             grep -q '@zibokapi/dsh-codex-computer-use/computer-local' "$dump"
             grep -q 'computer-tools' "$dump"
@@ -144,7 +191,7 @@ jobs:
       - name: Verify every patch row resolves and loads from both installs
         run: |
           export DSH_HOME="$RUNNER_TEMP/dsh-home"
-          for profile in ci citar; do
+          for profile in ci citar cigit; do
             echo "--- profile: $profile"
             node --input-type=module -e "
               import { createRequire } from 'node:module'

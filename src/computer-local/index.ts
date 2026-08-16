@@ -44,6 +44,7 @@ import type { SubprocessHandle, SubprocessOutputReader } from '@deepseek-ai/dsh-
 import { clampTimeout, deadline, MAX_TIMER_DELAY_MS, timeoutOf } from '@deepseek-ai/dsh-timeout'
 import { DAEMON_METHODS, LineDecoder, buildRequest, parseResponse } from './protocol.ts'
 import type { DaemonMethod } from './protocol.ts'
+import { defaultHelperPath } from '../setup/paths.ts'
 
 /** Environment override for the daemon path when the composition config leaves it unset. */
 export const HELPER_PATH_ENV = 'DSH_COMPUTER_HELPER_PATH'
@@ -111,8 +112,10 @@ const DAEMON_STDERR_TAIL_BYTES = 64_000
 /** Plugin config (all optional — `static Config` supplies the defaults). */
 export interface Config {
   /**
-   * Absolute path to the `dsh-computer-daemon` executable. Absent both here
-   * and in {@link HELPER_PATH_ENV}, the engine fails at load.
+   * Absolute path to the `dsh-computer-daemon` executable. Unset here and in
+   * {@link HELPER_PATH_ENV}, the engine uses the setup CLI's install location
+   * (`<dsh home>/computer-use`, built by `npx @zibokapi/dsh-codex-computer-use`);
+   * when that is absent too, the engine fails at load.
    */
   helperPath?: string
   /** Extra argv entries appended after the daemon path. */
@@ -502,12 +505,16 @@ export class LocalComputerEngine extends ComputerEngine {
       // derived from the source needs rebuilding when the document changes.
       onChange: () => {},
     })
-    // Fail loud at load when no composition value and no environment value
-    // name a daemon; a settings-document value present at load also resolves
-    // here through the source getter.
+    // Fail loud at load when no composition value, no environment value, and
+    // no setup-CLI install name a daemon; a settings-document value present at
+    // load also resolves here through the source getter.
     const helperPath = this.resolveHelperPath()
     if (helperPath === undefined || !existsSync(helperPath)) {
-      throw new Error(`computer-local: no computer-use daemon at ${JSON.stringify(helperPath ?? null)}; set helperPath or ${HELPER_PATH_ENV}`)
+      throw new Error(
+        `computer-local: no computer-use daemon at ${JSON.stringify(helperPath ?? null)} — `
+        + "run 'npx @zibokapi/dsh-codex-computer-use' to build and install it "
+        + '(or set helperPath / DSH_COMPUTER_HELPER_PATH)',
+      )
     }
     ctx.effect(() => () => {
       const connection = this.connection
@@ -550,19 +557,24 @@ export class LocalComputerEngine extends ComputerEngine {
     )
   }
 
-  /** Resolve the daemon path per spawn: settings/config first, then the environment override. */
+  /** Resolve the daemon path per spawn: settings/config, then the environment override, then the setup CLI's install location. */
   private resolveHelperPath(): string | undefined {
     const configured = this.source().helperPath?.trim()
     if (configured !== undefined && configured.length > 0) return configured
     const fromEnv = process.env[HELPER_PATH_ENV]?.trim()
-    return fromEnv !== undefined && fromEnv.length > 0 ? fromEnv : undefined
+    if (fromEnv !== undefined && fromEnv.length > 0) return fromEnv
+    return defaultHelperPath()
   }
 
   /** The current daemon argv from the resolved path and extra args. */
   private daemonArgv(): readonly string[] {
     const helperPath = this.resolveHelperPath()
     if (helperPath === undefined || !existsSync(helperPath)) {
-      throw new Error(`computer-local: no computer-use daemon at ${JSON.stringify(helperPath ?? null)}; set helperPath or ${HELPER_PATH_ENV}`)
+      throw new Error(
+        `computer-local: no computer-use daemon at ${JSON.stringify(helperPath ?? null)} — `
+        + "run 'npx @zibokapi/dsh-codex-computer-use' to build and install it "
+        + '(or set helperPath / DSH_COMPUTER_HELPER_PATH)',
+      )
     }
     /* v8 ignore next -- the schema defaults helperArgs to [], so the fallback guards a hand-built config only. */
     return [helperPath, ...(this.source().helperArgs ?? [])]

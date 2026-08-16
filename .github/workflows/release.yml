@@ -7,8 +7,9 @@ on:
 
 jobs:
   # Tag-triggered npm release: run the full check against published harness
-  # packages, then publish the built tarball. `prepare` rebuilds lib/ before
-  # packing, so the published artifact is always the current source.
+  # packages, then publish the built tarball. The explicit build (and
+  # `prepublishOnly`) rebuild lib/ before packing, so the published artifact is
+  # always the current source.
   publish:
     runs-on: ubuntu-latest
     permissions:
